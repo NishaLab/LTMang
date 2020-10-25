@@ -11,12 +11,15 @@ import java.io.Serializable;
  *
  * @author LEGION
  */
-public class Question implements Serializable{
+public class Question implements Serializable {
+
+    private int id;
+    private String questionContent;
+    private String answerA, answerB, answerC, answerD;
+    private int correctAnswer;
 
     public Question() {
     }
-
-
 
     public String getQuestionContent() {
         return questionContent;
@@ -88,9 +91,5 @@ public class Question implements Serializable{
     public String toString() {
         return "Question{" + "id=" + id + ", questionContent=" + questionContent + ", answerA=" + answerA + ", answerB=" + answerB + ", answerC=" + answerC + ", answerD=" + answerD + ", correctAnswer=" + correctAnswer + '}';
     }
-    
-    private int id;
-    private String questionContent;
-    private String answerA,answerB,answerC,answerD;
-    private int correctAnswer;
+
 }
