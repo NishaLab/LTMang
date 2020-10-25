@@ -16,14 +16,7 @@ public class Question implements Serializable{
     public Question() {
     }
 
-    public Question(String questionContent, String answerA, String answerB, String answerC, String answerD, int correctAnswer) {
-        this.questionContent = questionContent;
-        this.answerA = answerA;
-        this.answerB = answerB;
-        this.answerC = answerC;
-        this.answerD = answerD;
-        this.correctAnswer = correctAnswer;
-    }
+
 
     public String getQuestionContent() {
         return questionContent;
@@ -72,6 +65,31 @@ public class Question implements Serializable{
     public void setCorrectAnswer(int correctAnswer) {
         this.correctAnswer = correctAnswer;
     }
+
+    public Question(int id, String questionContent, String answerA, String answerB, String answerC, String answerD, int correctAnswer) {
+        this.id = id;
+        this.questionContent = questionContent;
+        this.answerA = answerA;
+        this.answerB = answerB;
+        this.answerC = answerC;
+        this.answerD = answerD;
+        this.correctAnswer = correctAnswer;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Question{" + "id=" + id + ", questionContent=" + questionContent + ", answerA=" + answerA + ", answerB=" + answerB + ", answerC=" + answerC + ", answerD=" + answerD + ", correctAnswer=" + correctAnswer + '}';
+    }
+    
+    private int id;
     private String questionContent;
     private String answerA,answerB,answerC,answerD;
     private int correctAnswer;
