@@ -34,12 +34,17 @@ public class ClientHandler extends Thread {
         String received;
         String reponse = "You have choosed ";
         System.out.println("Here");
+        
+        try {
+             dos.writeUTF("Hello");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         while (true) {
             try {
-                dos.writeUTF("Hello");
                 received = dis.readUTF();
                 System.out.println("Here4");
-
                 if (received.compareTo("Q") == 0) {
                     System.out.println("Closing");
                     this.client.close();
@@ -53,6 +58,7 @@ public class ClientHandler extends Thread {
                             break;
                         case "B":
                             System.out.println("Received B");
+                            System.out.println(reponse + received);
                             dos.writeUTF(reponse + received);
                             break;
                         case "C":
