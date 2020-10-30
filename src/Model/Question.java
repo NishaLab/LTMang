@@ -13,13 +13,22 @@ import java.io.Serializable;
  */
 public class Question implements Serializable {
 
+
     private int id;
+    private String title;
     private String questionContent;
     private String answerA, answerB, answerC, answerD;
     private int correctAnswer;
 
-    public Question() {
+    public String getTitle() {
+        return title;
     }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
 
     public String getQuestionContent() {
         return questionContent;
@@ -69,8 +78,9 @@ public class Question implements Serializable {
         this.correctAnswer = correctAnswer;
     }
 
-    public Question(int id, String questionContent, String answerA, String answerB, String answerC, String answerD, int correctAnswer) {
+    public Question(int id, String title, String questionContent, String answerA, String answerB, String answerC, String answerD, int correctAnswer) {
         this.id = id;
+        this.title = title;
         this.questionContent = questionContent;
         this.answerA = answerA;
         this.answerB = answerB;
@@ -78,6 +88,8 @@ public class Question implements Serializable {
         this.answerD = answerD;
         this.correctAnswer = correctAnswer;
     }
+
+    public Question() {}
 
     public int getId() {
         return id;
