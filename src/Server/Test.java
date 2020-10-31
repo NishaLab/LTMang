@@ -18,14 +18,22 @@ public class Test {
     public static void main(String[] args) {
         GameDAO gd = new GameDAO();
         Game game = new Game();
-        try {
-            game = gd.getGameById(1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        for (Session sess : game.getSessions()) {
-            System.out.println(sess);
-        }
-        System.out.println(game);
+        Player player = new Player(1, "123456");
+        Question question = new Question(1, "title", "123", "!23", "!23", "!23", "!23", 1);
+        PlayedQuestion pq = new PlayedQuestion();
+        pq.setChosenAnswer(1);
+        pq.setIsCorrect(true);
+        pq.setQuestion(question);
+        pq.setTime(10);
+        Session session = new Session();
+        session.setPlayer(player);
+        ArrayList<PlayedQuestion> q = new ArrayList<>();
+        q.add(pq);
+        session.setQuestion(q);
+        game.setPlayDate(new Date());
+        ArrayList<Session> ss = new ArrayList<>();
+        ss.add(session);
+        game.setSessions(ss);
+        gd.saveGame(game);
     }
 }
