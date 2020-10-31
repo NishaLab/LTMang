@@ -8,84 +8,126 @@ package Server;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
+
 import DAO.*;
 import Model.*;
 
 /**
- *
  * @author LEGION
  */
 public class ClientHandler extends Thread {
 
-    final DataOutputStream dos;
-    final DataInputStream dis;
-    final Socket client;
-    private ArrayList<Question> question;
+    private ObjectOutputStream dos;
+    private ObjectInputStream dis;
+    private Socket client;
+    private Question question;
+    private String response;
 
-    public ClientHandler(DataOutputStream dos, DataInputStream dis, Socket client) {
+    public ObjectOutputStream getDos() {
+        return dos;
+    }
+
+    public ObjectInputStream getDis() {
+        return dis;
+    }
+
+    public Socket getClient() {
+        return client;
+    }
+
+
+    public String getResponse() {
+        return response;
+    }
+
+
+    public ClientHandler(ObjectOutputStream dos, ObjectInputStream dis, Socket client) {
         this.dos = dos;
         this.dis = dis;
         this.client = client;
     }
-    
-    
-    @Override
-    public void run() {
-        String received;
-        String reponse = "You have choosed ";
-        System.out.println("Here");
-        
-        try {
-             dos.writeUTF("Hello");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        while (true) {
-            try {
-                received = dis.readUTF();
-                System.out.println("Here4");
-                if (received.compareTo("Q") == 0) {
-                    System.out.println("Closing");
-                    this.client.close();
-                    System.out.println("Closed");
-                    break;
-                } else {
-                    switch (received) {
-                        case "A":
-                            System.out.println("Received A");
-                            dos.writeUTF(reponse + received);
-                            break;
-                        case "B":
-                            System.out.println("Received B");
-                            System.out.println(reponse + received);
-                            dos.writeUTF(reponse + received);
-                            break;
-                        case "C":
-                            System.out.println("Received C");
-
-                            dos.writeUTF(reponse + received);
-                            break;
-                        case "D":
-                            System.out.println("Received D");
-
-                            dos.writeUTF(reponse + received);
-                            break;
-                        default:
-                            System.out.println(received);
-                            break;
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-//            try {
-//                dis.close();
-//                dos.close();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-        }
+    public ClientHandler(ObjectOutputStream dos, ObjectInputStream dis, Socket client, Question question) {
+        this.dos = dos;
+        this.dis = dis;
+        this.client = client;
+        this.question = question;
     }
 
+
+    public void setQuestion(Question question) {
+        this.question = question;
+    }
+
+
+    @Override
+    public void run() {
+
+        try {
+            dos.writeObject(question);
+            dos.flush();
+
+
+            response = dis.readUTF();
+
+            //System.out.println(response);
+            System.out.println(question.getTitle() + " " + response);
+
+        } catch (IOException e) {
+
+        }
+
+
+        System.out.println("Thread's life end.");
+
+//        while (true) {
+//            questionTime = System.currentTimeMillis();
+//            System.out.println("Here");
+//
+//            QuestionDAO questionDAO = new QuestionDAO();
+//            question = questionDAO.getAllQuestion();
+//            try {
+//                dos.writeInt(question.size());
+//                dos.flush();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            for (Question q : question) {
+//                try {
+////                        dos.writeUTF(q.getQuestionContent());
+////                        dos.writeUTF(q.getAnswerA());
+////                        dos.writeUTF(q.getAnswerB());
+////                        dos.writeUTF(q.getAnswerC());
+////                        dos.writeUTF(q.getAnswerD());
+//
+//                        //Thread.sleep(5000);
+//                    dos.writeObject(q);
+//                    dos.flush();
+//
+//                    timeCounter();
+//
+//
+//                    String ans = dis.readUTF();
+//
+//                    System.out.println(ans);
+////                    if (ans == null) {
+////                        dos.writeBoolean(isTimedout);
+////                        System.out.println("Time out.");
+////                    } else {
+////                        System.out.println(ans);
+////                    }
+//                    System.out.println("DONE");
+//                } catch (Exception e) {
+//                    System.out.println(e.getMessage());
+//                }
+//
+//            }
+//
+//        }
+//    }
+
+    }
 }
+
+

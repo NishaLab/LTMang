@@ -17,13 +17,15 @@ public class QuestionDAO extends DAO {
 
     public ArrayList<Question> getAllQuestion() {
         ArrayList<Question> res = new ArrayList<>();
-        String sql = "Select * from question";
+        String sql = "select * from tblquestion";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 Question question = new Question();
                 question.setId(rs.getInt("id"));
+                question.setTitle(rs.getString("title"));
+                question.setQuestionContent(rs.getString("content"));
                 question.setAnswerA(rs.getString("answerA"));
                 question.setAnswerB(rs.getString("answerB"));
                 question.setAnswerC(rs.getString("answerC"));
@@ -40,7 +42,7 @@ public class QuestionDAO extends DAO {
 
     public Question getQuestionById(int id) {
         Question question = new Question();
-        String sql = "select * from tblQuestion where id = ?";
+        String sql = "select * from tblquestion where id = ?";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
@@ -51,7 +53,7 @@ public class QuestionDAO extends DAO {
                 question.setAnswerB(rs.getString("answerB"));
                 question.setAnswerC(rs.getString("answerC"));
                 question.setAnswerD(rs.getString("answerD"));
-                question.setCorrectAnswer(rs.getInt("correctAnswer"));
+                question.setCorrectAnswer(rs.getInt("answer"));
             }
         } catch (Exception e) {
             e.printStackTrace();
