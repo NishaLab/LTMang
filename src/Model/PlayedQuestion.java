@@ -12,18 +12,21 @@ import java.io.Serializable;
  * @author LEGION
  */
 public class PlayedQuestion implements Serializable{
-    private int id;
+    private int id, time, chosenAnswer;
     private boolean isCorrect;
     private Question question;
-
     public PlayedQuestion() {
     }
 
-    public PlayedQuestion(int id, boolean isCorrect, Question question) {
+    public PlayedQuestion(int id, int time, int chosenAnswer, boolean isCorrect, Question question) {
         this.id = id;
+        this.time = time;
+        this.chosenAnswer = chosenAnswer;
         this.isCorrect = isCorrect;
         this.question = question;
     }
+
+
 
     public int getId() {
         return id;
@@ -49,9 +52,26 @@ public class PlayedQuestion implements Serializable{
         this.question = question;
     }
 
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+    public int getChosenAnswer() {
+        return chosenAnswer;
+    }
+
+    public void setChosenAnswer(int chosenAnswer) {
+        this.chosenAnswer = chosenAnswer;
+    }
+
     @Override
     public String toString() {
-        return "PlayedQuestion{" + "id=" + id + ", isCorrect=" + isCorrect + ", question=" + question + '}';
+        return "PlayedQuestion{" + "id=" + id + ", time=" + time + ", chosenAnswer=" + chosenAnswer + ", isCorrect=" + isCorrect + ", question=" + question + '}';
     }
-    
+
+
 }

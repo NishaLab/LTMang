@@ -50,6 +50,8 @@ public class SessionDAO extends DAO {
                     int question_id = aux.getInt("Question_id");
                     Question question = qd.getQuestionById(question_id);
                     pq.setQuestion(question);
+                    pq.setChosenAnswer(aux.getInt("chosenAnswer"));
+                    pq.setTime(aux.getInt("time"));
                     questionList.add(pq);
                 }
                 session.setQuestion(questionList);
@@ -59,5 +61,28 @@ public class SessionDAO extends DAO {
             e.printStackTrace();
         }
         return res;
+    }
+
+    public boolean saveSession(Session session, int game_id) {
+        PlayedQuestionDAO pqd = new PlayedQuestionDAO();
+        String sessionSQL = "INSERT INTO tblsession(Player_id, tblGame_id) VALUES(?,?)";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sessionSQL, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, session.getPlayer().getId());
+            ps.setInt(2, game_id);
+            ps.executeUpdate();
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                session.setId(generatedKeys.getInt(1));
+                for (PlayedQuestion playedQuestion : session.getQuestion()) {
+                    pqd.savePlayedQuestion(playedQuestion, session.getId());
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

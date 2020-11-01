@@ -60,4 +60,23 @@ public class QuestionDAO extends DAO {
         }
         return question;
     }
+
+    public boolean saveQuestion(Question question) {
+        String sql = "INSERT INTO tblquestion(title, answerA, answerB, answerC, answerD, answer, content) VALUES(?,?,?,?,?,?,?)";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, question.getTitle());
+            ps.setString(2, question.getAnswerA());
+            ps.setString(3, question.getAnswerB());
+            ps.setString(4, question.getAnswerC());
+            ps.setString(5, question.getAnswerD());
+            ps.setInt(6, question.getCorrectAnswer());
+            ps.setString(7, question.getQuestionContent());
+            ps.executeQuery();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 }
