@@ -18,10 +18,12 @@ import java.util.Date;
 import Model.Question;
 import keeptoo.*;
 
-public class ClientController implements Runnable {
+public class ClientController implements Runnable{
 
     final ClientFrame frame;
     private Socket client;
+    private int remotePort;
+    private String host;
 
     private Question question;
     //    private DataOutputStream dos;
@@ -32,8 +34,14 @@ public class ClientController implements Runnable {
 
     public ClientController(ClientFrame frame) {
         this.frame = frame;
+        host = "127.0.0.1";
+        remotePort = 5056;
+
+    }
+
+    private void connect(String host, int remotePort) {
         try {
-            this.client = new Socket("127.0.0.1", 5056);
+            this.client = new Socket(host, remotePort);
 //            this.dos = new DataOutputStream(client.getOutputStream());
 //            this.dis = new DataInputStream(client.getInputStream());
             this.dos = new ObjectOutputStream(client.getOutputStream());
@@ -53,6 +61,16 @@ public class ClientController implements Runnable {
         KButton bBtt = frame.getbBtt();
         KButton cBtt = frame.getcBtt();
         KButton dBtt = frame.getdBtt();
+        KButton startBtn = frame.getExportBtt();
+
+        startBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Play btn");
+                connect(host, remotePort);
+                run();
+            }
+        });
         aBtt.addActionListener(new ActionListener() {
 
             @Override
@@ -114,6 +132,7 @@ public class ClientController implements Runnable {
             answer = null;
 
             try {
+
                 question = (Question) dis.readObject();
                 System.out.println(question);
 
@@ -127,20 +146,27 @@ public class ClientController implements Runnable {
                 String timeout = dis.readUTF();
 
 
-                System.out.println(timeout + ", " + answer);
                 if (answer == null) {
                     answer = "No answer";
                     dos.writeUTF(answer);
                     dos.flush();
                 }
+                System.out.println(timeout + ", " + answer);
 
 
             } catch (SocketException e) {
+                frame.getQuestion().setText("Server is not available.");
                 System.out.println("Server is not available.");
                 break;
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        try {
+            dis.close();
+            dos.close();
+        } catch (IOException e) {
+            System.out.println(client.getPort() + " disconnected");
         }
 
 //        try {
