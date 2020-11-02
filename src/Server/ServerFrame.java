@@ -36,7 +36,6 @@ public class ServerFrame extends javax.swing.JFrame {
         }
         sfc.init();
         this.setVisible(true);
-        sfc.run();
     }
 
     /**
@@ -238,7 +237,7 @@ public class ServerFrame extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        ServerFrame frame = new ServerFrame();
+        new ServerFrame();
     }
 
     public KButton getaBtt() {
