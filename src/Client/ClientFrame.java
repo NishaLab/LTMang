@@ -32,7 +32,7 @@ public class ClientFrame extends javax.swing.JFrame {
         }
         cc.init();
         this.setVisible(true);
-        cc.run();
+
     }
 
     /**
@@ -80,7 +80,7 @@ public class ClientFrame extends javax.swing.JFrame {
         dBtt.setkBorderRadius(50);
 
         question.setForeground(new java.awt.Color(255, 255, 255));
-        question.setText("jLabel1");
+        question.setText("Question here");
 
         counter.setForeground(new java.awt.Color(255, 255, 255));
         counter.setText("Counter");
@@ -200,10 +200,12 @@ public class ClientFrame extends javax.swing.JFrame {
 
     private void aBttActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aBttActionPerformed
         // TODO add your handling code here:
+        System.out.println("Play Btn");
     }//GEN-LAST:event_aBttActionPerformed
 
     private void exportBttActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportBttActionPerformed
         // TODO add your handling code here:
+        System.out.println("ExportBtn");
     }//GEN-LAST:event_exportBttActionPerformed
 
     /**
