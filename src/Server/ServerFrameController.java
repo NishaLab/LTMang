@@ -17,6 +17,7 @@ import java.net.*;
 import java.util.Date;
 
 import Model.Question;
+import static Server.CustomServer.port;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -27,12 +28,10 @@ import keeptoo.*;
 public class ServerFrameController {
 
     private ServerFrame frame;
-    private CustomServer cs;
 
     public ServerFrameController(ServerFrame frame) {
         this.frame = frame;
         try {
-            cs = new CustomServer(frame);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -42,6 +41,16 @@ public class ServerFrameController {
         setStartBttAction();
         setPauseBttAction();
         setNextBttAction();
+    }
+    
+    private void startCustomServer() {
+        new Thread() {
+            @Override
+            public void run() {
+                new CustomServer(frame).start();
+            }
+            
+        }.start();
     }
 
     public void setStartBttAction() {
@@ -62,7 +71,7 @@ public class ServerFrameController {
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                run();
+                startCustomServer();
             }
         });
     }
@@ -105,13 +114,5 @@ public class ServerFrameController {
 
     public void run() {
         // call ham main cua CustomServer tai day
-
-        try {
-            cs.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 }

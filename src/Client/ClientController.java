@@ -18,7 +18,7 @@ import java.util.Date;
 import Model.Question;
 import keeptoo.*;
 
-public class ClientController implements Runnable{
+public class ClientController {
 
     final ClientFrame frame;
     private Socket client;
@@ -49,12 +49,24 @@ public class ClientController implements Runnable{
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("connected");
     }
 
     public void init() {
         setButtonAction();
     }
 
+    private void startClient() {
+        new Thread() {
+            @Override
+            public void run() {
+                connect(host, remotePort);
+                runClient();
+            }
+            
+        }.start();
+    }
+    
     void setButtonAction() {
 
         KButton aBtt = frame.getaBtt();
@@ -62,13 +74,14 @@ public class ClientController implements Runnable{
         KButton cBtt = frame.getcBtt();
         KButton dBtt = frame.getdBtt();
         KButton startBtn = frame.getExportBtt();
+        
+        
 
         startBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Play btn");
-                connect(host, remotePort);
-                run();
+                startClient();
             }
         });
         aBtt.addActionListener(new ActionListener() {
@@ -127,7 +140,8 @@ public class ClientController implements Runnable{
         });
     }
 
-    public void run() {
+    public void runClient() {
+        System.out.println("run");
         while (true) {
             answer = null;
 
