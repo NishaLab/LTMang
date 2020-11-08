@@ -8,7 +8,8 @@ package Client;
 /**
  * @author LEGION
  */
-
+import DAO.PlayerDAO;
+import Model.Player;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -16,6 +17,11 @@ import java.net.*;
 import java.util.Date;
 
 import Model.Question;
+import Model.Session;
+import Server.CustomServer;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import javax.swing.SwingWorker;
 import keeptoo.*;
 
 public class ClientController {
@@ -26,6 +32,7 @@ public class ClientController {
     private String host;
 
     private Question question;
+    private int timer;
     //    private DataOutputStream dos;
 //    private DataInputStream dis;
     private ObjectOutputStream dos;
@@ -46,6 +53,14 @@ public class ClientController {
 //            this.dis = new DataInputStream(client.getInputStream());
             this.dos = new ObjectOutputStream(client.getOutputStream());
             this.dis = new ObjectInputStream(client.getInputStream());
+            Player player = new Player();
+            player.setAddress(this.client.getLocalAddress().toString());
+            player.setName(this.frame.getNameField().getText());
+            this.frame.getNameField().setEditable(false);
+            PlayerDAO pd = new PlayerDAO();
+            player = pd.createPlayerIfNotExist(player);
+            this.dos.writeObject(player);
+            this.dos.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -63,10 +78,10 @@ public class ClientController {
                 connect(host, remotePort);
                 runClient();
             }
-            
+
         }.start();
     }
-    
+
     void setButtonAction() {
 
         KButton aBtt = frame.getaBtt();
@@ -74,14 +89,13 @@ public class ClientController {
         KButton cBtt = frame.getcBtt();
         KButton dBtt = frame.getdBtt();
         KButton startBtn = frame.getExportBtt();
-        
-        
 
         startBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Play btn");
                 startClient();
+                frame.getQuestion().setText("Connecting to server, Please Wait...");
             }
         });
         aBtt.addActionListener(new ActionListener() {
@@ -90,8 +104,8 @@ public class ClientController {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked A");
                 try {
-                    answer = "A";
-                    dos.writeUTF("A");
+                    answer = "1";
+                    dos.writeUTF("1");
                     dos.flush();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -103,8 +117,8 @@ public class ClientController {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked B");
                 try {
-                    answer = "B";
-                    dos.writeUTF("B");
+                    answer = "2";
+                    dos.writeUTF("2");
                     dos.flush();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -117,8 +131,8 @@ public class ClientController {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked C");
                 try {
-                    answer = "C";
-                    dos.writeUTF("C");
+                    answer = "3";
+                    dos.writeUTF("3");
                     dos.flush();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -130,8 +144,8 @@ public class ClientController {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked D");
                 try {
-                    answer = "D";
-                    dos.writeUTF("D");
+                    answer = "4";
+                    dos.writeUTF("4");
                     dos.flush();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -140,33 +154,74 @@ public class ClientController {
         });
     }
 
+    public void startTimeCountdown(int time) throws InterruptedException, IOException, ExecutionException {
+        int timeLeft = time;
+        SwingWorker worker = new SwingWorker() {
+            @Override
+            protected String doInBackground() throws Exception {
+                for (int i = time; i >= 0; i--) {
+                    publish(i);
+                    Thread.sleep(1000);
+                    //System.out.println(i);
+                }
+                return "Time's up.";
+            }
+
+            @Override
+            protected void process(List chunks) {
+                int val = (int) chunks.get(chunks.size() - 1);
+
+                frame.getCounter().setText(String.valueOf(val));
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    String statusMsg = (String) get();
+                    System.out.println(statusMsg);
+                    frame.getCounter().setText(statusMsg);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        worker.execute();
+    }
+
     public void runClient() {
         System.out.println("run");
         while (true) {
             answer = null;
 
             try {
+                Object obj = dis.readObject();
+                if ((String) obj == "Game Over") {
 
-                question = (Question) dis.readObject();
-                System.out.println(question);
+                } else {
+                    question = (Question) obj;
+                    timer = dis.readInt();
+                    System.out.println(timer);
+                    System.out.println(question);
+                    startTimeCountdown(timer);
 
-                frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
-                frame.getaBtt().setText("A. " + question.getAnswerA());
-                frame.getbBtt().setText("B. " + question.getAnswerB());
-                frame.getcBtt().setText("C. " + question.getAnswerC());
-                frame.getdBtt().setText("D. " + question.getAnswerD());
+                    frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
+                    frame.getaBtt().setText("A. " + question.getAnswerA());
+                    frame.getbBtt().setText("B. " + question.getAnswerB());
+                    frame.getcBtt().setText("C. " + question.getAnswerC());
+                    frame.getdBtt().setText("D. " + question.getAnswerD());
 
-                //Wait for server to send 'Time out' message
-                String timeout = dis.readUTF();
+                    //Wait for server to send 'Time out' message
+                    String timeout = dis.readUTF();
 
-
-                if (answer == null) {
-                    answer = "No answer";
-                    dos.writeUTF(answer);
-                    dos.flush();
+                    if (answer == null) {
+                        answer = "No answer";
+                        dos.writeUTF(answer);
+                        dos.flush();
+                    }
+                    System.out.println(timeout + ", " + answer);
                 }
-                System.out.println(timeout + ", " + answer);
-
 
             } catch (SocketException e) {
                 frame.getQuestion().setText("Server is not available.");
@@ -236,5 +291,8 @@ public class ClientController {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+    }
+    public void startVictoryScreen(Session s){
+        
     }
 }
