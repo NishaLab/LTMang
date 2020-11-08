@@ -5,10 +5,12 @@
  */
 package Server;
 
+import Model.Player;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import keeptoo.KButton;
 import keeptoo.KGradientPanel;
 
@@ -359,7 +361,13 @@ public class ServerFrame extends javax.swing.JFrame {
     public void setQuestionPanel(JPanel questionPanel) {
         this.questionPanel = questionPanel;
     }
-
+    
+    public void addPlayerToTable(Player player) {
+        DefaultTableModel dptb = (DefaultTableModel) this.getPlayerTable().getModel();
+        Object[] tmp;
+        tmp = new Object[]{this.getPlayerTable().getRowCount()+1,player.getName(), player.getAddress()};
+        dptb.addRow(tmp);
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private keeptoo.KButton aBtt;
     private keeptoo.KButton bBtt;
