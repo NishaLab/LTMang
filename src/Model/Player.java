@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 public class Player implements Serializable{
     private int id;
-    private String address;
+    private String name,address;
 
     public int getId() {
         return id;
@@ -31,17 +31,30 @@ public class Player implements Serializable{
         this.address = address;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
-        return "Player{" + "id=" + id + ", address=" + address + '}';
+        return "Player{" + "id=" + id + ", name=" + name + ", address=" + address + '}';
     }
+
+
 
     public Player() {
     }
 
-    public Player(int id, String address) {
+    public Player(int id, String name, String address) {
         this.id = id;
+        this.name = name;
         this.address = address;
     }
+
+
     
 }
