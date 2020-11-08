@@ -39,7 +39,6 @@ public class ServerFrameController {
 
     public void init() {
         setStartBttAction();
-        setPauseBttAction();
         setNextBttAction();
     }
     
@@ -74,15 +73,6 @@ public class ServerFrameController {
         });
     }
 
-    public void setPauseBttAction() {
-        KButton pause = frame.getPauseBtt();
-        pause.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        });
-    }
 
     public void setQuestionPanel(Question question) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
