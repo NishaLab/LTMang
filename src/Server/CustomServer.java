@@ -5,10 +5,10 @@
  */
 package Server;
 
-import DAO.QuestionDAO;
+import DAO.*;
 import Helper.CountdownHelper;
-import Model.Question;
-
+import Model.*;
+import Server.ServerFrameController;
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
@@ -31,12 +31,14 @@ public class CustomServer {
     private static ArrayList<String> clientAnswers;
     //List clients
     private static ArrayList<Socket> clients;
-
+    //List session
+    private static ArrayList<Session> sessions;
     //Map oos to client
     private static HashMap<Socket, ObjectOutputStream> outStreamMap;
     //Map ois to client
     private static HashMap<Socket, ObjectInputStream> inStreamMap;
-
+    //Map session to client
+    private static HashMap<Socket, Session> sessionMap;
     //check if time to connect to server is over
     private static boolean isOver;
     final static int port = 5056;
@@ -117,6 +119,7 @@ public class CustomServer {
 
         Socket client = null;
         client = ss.accept();
+
         clients.add(client);
         System.out.println("Client " + client.getPort() + " connected to server.");
 
@@ -128,11 +131,14 @@ public class CustomServer {
             //Init
             ObjectInputStream dis;
             ObjectOutputStream dos;
-            clients = new ArrayList<>();
-            clientHandlers = new ArrayList<>();
-            clientAnswers = new ArrayList<>();
-            inStreamMap = new HashMap<>();
-            outStreamMap = new HashMap<>();
+            GameDAO gd      = new GameDAO();
+            clients         = new ArrayList<>();
+            clientHandlers  = new ArrayList<>();
+            clientAnswers   = new ArrayList<>();
+            inStreamMap     = new HashMap<>();
+            outStreamMap    = new HashMap<>();
+            sessionMap      = new HashMap<>();
+            sessions        = new ArrayList<>();
             //        ServerSocket ss = null;
             //
             //        ss = new ServerSocket(port);
@@ -150,9 +156,10 @@ public class CustomServer {
             }
 
             startTimeCountdown(timeConnectToServer);
+            System.out.println(isOver);
 
             while (!isOver) {
-                //System.out.println(isOver);
+                System.out.println(isOver);
                 try {
                     getConnections(ss);
                 } catch (IOException ex) {
@@ -189,13 +196,29 @@ public class CustomServer {
                 try {
                     dis = new ObjectInputStream(client.getInputStream());
                     dos = new ObjectOutputStream(client.getOutputStream());
+                    Player player = new Player();
+                    try {
+                        player = (Player) dis.readObject();
+                        frame.addPlayerToTable(player);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(player);
                     inStreamMap.put(client, dis);
                     outStreamMap.put(client, dos);
+                    Session tmp                  = new Session();
+                    ArrayList<PlayedQuestion> pq = new ArrayList<>();
+                    tmp.setPlayer(player);
+                    tmp.setQuestion(pq);
+                    sessionMap.put(client, tmp);
                 } catch (IOException ex) {
                     Logger.getLogger(CustomServer.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
+            Game game = new Game();
+            game.setPlayDate(new Date());
+            
             //Loop through questions list
             for (Question q : question) {
 
@@ -209,7 +232,7 @@ public class CustomServer {
                     System.out.println(client);
                     dis = inStreamMap.get(client);
                     dos = outStreamMap.get(client);
-                    ClientHandler thread = new ClientHandler(dos, dis, client, q);
+                    ClientHandler thread = new ClientHandler(dos, dis, client, q, timeAnswerQuest);
                     clientHandlers.add(thread);
                 }
 
@@ -229,6 +252,8 @@ public class CustomServer {
                             clients.remove(toBeRemoved);
                             inStreamMap.remove(toBeRemoved);
                             continue;
+                        } else {
+                            System.out.println(ch.getResponse());
                         }
                         dos.writeUTF("Time out");
                         //System.out.println(ch.getDis());
@@ -253,11 +278,24 @@ public class CustomServer {
             System.out.println("Answers: ");
             String answer = "";
             for (String ans : clientAnswers) {
-                answer+=ans + "\n";
+                answer += ans + "\n";
                 System.out.println(ans);
             }
-            frame.getQuestion().setText(answer + "\nGame over.");
-            System.out.println("Game over.");
+//            frame.getQuestion().setText(answer + "\nGame over.");
+            for (Socket client : clients) {
+                sessions.add(sessionMap.get(client));
+            }
+            game.setSessions(sessions);
+            for (ClientHandler clientHandler : clientHandlers) {
+                dos = clientHandler.getDos();
+                dos.writeUTF("Game Over");
+                dos.flush();
+                dos.writeObject(sessionMap.get(clientHandler.getClient()));
+                dos.flush();
+            }
+            gd.saveGame(game);
+            frame.getQuestion().setText("Game Over!");
+            frame.getMainBtt().setVisible(true);
         } catch (InterruptedException ex) {
             Logger.getLogger(CustomServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -377,7 +415,8 @@ public class CustomServer {
 
             String ans = ch.getResponse();
             String finalAnswer = ch.getClient().getPort() + ";" + q.getTitle() + ";";
-
+            PlayedQuestion pq = new PlayedQuestion();
+            pq.setQuestion(q);
             if (ch.getState() == Thread.State.RUNNABLE) {
                 //System.out.println(ch.getClient().getPort() + "; " + ch.getState());
                 while (ans == null) {
@@ -385,9 +424,16 @@ public class CustomServer {
                 }
             }
             if (ans != null) {
+                pq.setChosenAnswer(Integer.parseInt(ans));
+                if (pq.getQuestion().getCorrectAnswer() == pq.getChosenAnswer()) {
+                    pq.setIsCorrect(true);
+                } else {
+                    pq.setIsCorrect(false);
+                }
                 finalAnswer += ans;
                 clientAnswers.add(finalAnswer);
             }
+            sessionMap.get(ch.getClient()).getQuestion().add(pq);
 
         }
 
