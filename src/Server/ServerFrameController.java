@@ -28,7 +28,7 @@ import keeptoo.*;
 public class ServerFrameController {
 
     private ServerFrame frame;
-
+    
     public ServerFrameController(ServerFrame frame) {
         this.frame = frame;
         try {
@@ -55,23 +55,11 @@ public class ServerFrameController {
 
     public void setStartBttAction() {
         KButton start = frame.getMainBtt();
-//        ActionListener startAction = new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                try {
-//                    cs.start();
-//
-//                } catch (IOException ioException) {
-//                    ioException.printStackTrace();
-//                } catch (InterruptedException interruptedException) {
-//                    interruptedException.printStackTrace();
-//                }
-//            }
-//        };
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 startCustomServer();
+                start.setVisible(false);
             }
         });
     }
@@ -104,15 +92,4 @@ public class ServerFrameController {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void addPlayerToTable(Player player) {
-        DefaultTableModel dptb = (DefaultTableModel) this.frame.getPlayerTable().getModel();
-        Object[] tmp;
-        tmp = new Object[]{player.getId(), player.getAddress()};
-        dptb.addRow(tmp);
-
-    }
-
-    public void run() {
-        // call ham main cua CustomServer tai day
-    }
 }
