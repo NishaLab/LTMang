@@ -9,12 +9,12 @@ package Client;
  * @author LEGION
  */
 import DAO.PlayerDAO;
-import Model.Player;
+import Model.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
-import java.util.Date;
+import java.util.*;
 
 import Model.Question;
 import Model.Session;
@@ -294,5 +294,29 @@ public class ClientController {
     }
     public void startVictoryScreen(Session s){
         
+    }
+    public void saveHistory(Session session) throws IOException {
+
+        try {
+            FileWriter fw = new FileWriter("history.txt");
+            String record = "Id: " + session.getPlayer().getId() + " - "
+                    + "Address: " + session.getPlayer().getAddress() + "\n";
+            
+            ArrayList<PlayedQuestion> listQuestion = session.getQuestion();
+            for (PlayedQuestion playedQuestion : listQuestion) {
+                record = "Question: " + playedQuestion.getQuestion().getTitle() + " - "
+                        + "Chosen answer: " + handleAnswer(playedQuestion.getChosenAnswer()) + " - "
+                        + "Correct answer: " + handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()) + " - "
+                        + "Time: " + playedQuestion.getTime()
+                        + "\n";
+                System.out.println(record);
+                fw.write((String) record);
+            }
+
+            fw.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        System.out.println("Success...");
     }
 }
