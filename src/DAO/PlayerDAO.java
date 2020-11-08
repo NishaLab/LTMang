@@ -33,4 +33,33 @@ public class PlayerDAO extends DAO {
 
         return res;
     }
+
+    public Player createPlayerIfNotExist(Player player) {
+        String sql = "Select * from tblplayer WHERE address = ?";
+        try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, player.getAddress());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                player.setId(rs.getInt("id"));
+                player.setName(rs.getString("name"));
+                player.setAddress(rs.getString("address"));
+            } else {
+                System.out.println("create");
+                sql = "INSERT INTO tblPlayer(name, address) VALUES(?,?)";
+                ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, player.getName());
+                ps.setString(2, player.getAddress());
+                ps.executeUpdate();
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    player.setId(generatedKeys.getInt(1));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return player;
+    }
 }
