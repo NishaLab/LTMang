@@ -19,6 +19,7 @@ import java.net.*;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * @author LEGION
@@ -206,7 +207,7 @@ public class CustomServer {
                     System.out.println(player);
                     inStreamMap.put(client, dis);
                     outStreamMap.put(client, dos);
-                    Session tmp                  = new Session();
+                    Session tmp = new Session();
                     ArrayList<PlayedQuestion> pq = new ArrayList<>();
                     tmp.setPlayer(player);
                     tmp.setQuestion(pq);
@@ -218,7 +219,7 @@ public class CustomServer {
 
             Game game = new Game();
             game.setPlayDate(new Date());
-            
+
             //Loop through questions list
             for (Question q : question) {
 
@@ -286,16 +287,17 @@ public class CustomServer {
                 sessions.add(sessionMap.get(client));
             }
             game.setSessions(sessions);
-            for (ClientHandler clientHandler : clientHandlers) {
-                dos = clientHandler.getDos();
-                dos.writeUTF("Game Over");
+            for (Socket client : clients) {
+                dos = outStreamMap.get(client);
+                dos.writeObject("Game Over");
                 dos.flush();
-                dos.writeObject(sessionMap.get(clientHandler.getClient()));
+                dos.writeObject(sessionMap.get(client));
                 dos.flush();
+                System.out.println("send Session" + sessionMap.get(client));
             }
             gd.saveGame(game);
             frame.getQuestion().setText("Game Over!");
-            frame.getMainBtt().setVisible(true);
+            reset();
         } catch (InterruptedException ex) {
             Logger.getLogger(CustomServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -437,6 +439,20 @@ public class CustomServer {
 
         }
 
+    }
+
+    public void reset() {
+        clients = new ArrayList<>();
+        clientHandlers = new ArrayList<>();
+        clientAnswers = new ArrayList<>();
+        inStreamMap = new HashMap<>();
+        outStreamMap = new HashMap<>();
+        sessionMap = new HashMap<>();
+        sessions = new ArrayList<>();
+        frame.getQuestion().setText("");
+        DefaultTableModel dtm = (DefaultTableModel) frame.getPlayerTable().getModel();
+        dtm.setRowCount(0);
+        frame.getMainBtt().setVisible(true);
     }
 
 }

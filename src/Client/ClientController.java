@@ -21,6 +21,7 @@ import Model.Session;
 import Server.CustomServer;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import keeptoo.*;
 
@@ -54,7 +55,7 @@ public class ClientController {
             this.dos = new ObjectOutputStream(client.getOutputStream());
             this.dis = new ObjectInputStream(client.getInputStream());
             Player player = new Player();
-            player.setAddress(this.client.getLocalAddress().toString());
+            player.setAddress(this.client.getRemoteSocketAddress().toString());
             player.setName(this.frame.getNameField().getText());
             this.frame.getNameField().setEditable(false);
             PlayerDAO pd = new PlayerDAO();
@@ -197,8 +198,11 @@ public class ClientController {
 
             try {
                 Object obj = dis.readObject();
-                if ((String) obj == "Game Over") {
-
+                if (obj instanceof String && "Game Over".equals((String) obj)) {
+                    System.out.println("read session");
+                    Session session = (Session) dis.readObject();
+                    startVictoryScreen(session);
+                    this.frame.setVisible(false);
                 } else {
                     question = (Question) obj;
                     timer = dis.readInt();
@@ -292,16 +296,53 @@ public class ClientController {
 //            e.printStackTrace();
 //        }
     }
-    public void startVictoryScreen(Session s){
-        
+
+    public void startVictoryScreen(Session s) {
+        VictoryScreenFrame vsf = new VictoryScreenFrame();
+        vsf.setVisible(true);
+        KButton mainBtt = vsf.getPlayBtt();
+        for (PlayedQuestion playedQuestion : s.getQuestion()) {
+            vsf.addPlayedQuestionToTable(playedQuestion);
+        }
+        mainBtt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                vsf.dispose();
+                frame.setVisible(true);
+            }
+        });
+        KButton exportBtt = vsf.getExportBtt();
+        exportBtt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveHistory(s);
+                JOptionPane.showMessageDialog(null, "Export Successful");
+
+            }
+        }
+        );
     }
-    public void saveHistory(Session session) throws IOException {
+
+    public String handleAnswer(int answer) {
+        switch (answer) {
+            case 1:
+                return "A";
+            case 2:
+                return "B";
+            case 3:
+                return "C";
+            default:
+                return "D";
+        }
+    }
+
+    public void saveHistory(Session session) {
 
         try {
             FileWriter fw = new FileWriter("history.txt");
             String record = "Id: " + session.getPlayer().getId() + " - "
                     + "Address: " + session.getPlayer().getAddress() + "\n";
-            
+
             ArrayList<PlayedQuestion> listQuestion = session.getQuestion();
             for (PlayedQuestion playedQuestion : listQuestion) {
                 record = "Question: " + playedQuestion.getQuestion().getTitle() + " - "
