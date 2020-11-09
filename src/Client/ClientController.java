@@ -55,11 +55,18 @@ public class ClientController {
             this.dos = new ObjectOutputStream(client.getOutputStream());
             this.dis = new ObjectInputStream(client.getInputStream());
             Player player = new Player();
-            player.setAddress(this.client.getRemoteSocketAddress().toString());
-            player.setName(this.frame.getNameField().getText());
-            this.frame.getNameField().setEditable(false);
             PlayerDAO pd = new PlayerDAO();
-            player = pd.createPlayerIfNotExist(player);
+            this.frame.getNameField().setEditable(false);
+            player = pd.getPlayerByAddress(this.client.getRemoteSocketAddress().toString());
+            if (player.getId() == 0) {
+                player.setName(this.frame.getNameField().getText());
+                player.setAddress((this.client.getRemoteSocketAddress().toString()));
+                pd.createPlayer(player);
+            }
+            if (player.getName().compareTo(this.frame.getNameField().getText()) != 0) {
+                player.setName(this.frame.getNameField().getText());
+                pd.updatePlayerName(player);
+            }
             this.dos.writeObject(player);
             this.dos.flush();
         } catch (Exception e) {
@@ -220,7 +227,7 @@ public class ClientController {
                     String timeout = dis.readUTF();
 
                     if (answer == null) {
-                        answer = "No answer";
+                        answer = "0";
                         dos.writeUTF(answer);
                         dos.flush();
                     }

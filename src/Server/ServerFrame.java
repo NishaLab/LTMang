@@ -115,7 +115,6 @@ public class ServerFrame extends javax.swing.JFrame {
         dBtt.setkBorderRadius(50);
 
         question.setForeground(new java.awt.Color(255, 255, 255));
-        question.setText("jLabel1");
 
         counter.setForeground(new java.awt.Color(255, 255, 255));
         counter.setText("Counter");
