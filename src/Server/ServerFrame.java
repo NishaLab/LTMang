@@ -5,10 +5,12 @@
  */
 package Server;
 
+import Model.Player;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import keeptoo.KButton;
 import keeptoo.KGradientPanel;
 
@@ -36,7 +38,8 @@ public class ServerFrame extends javax.swing.JFrame {
         }
         sfc.init();
         this.setVisible(true);
-        sfc.run();
+        this.getNextBtt().setVisible(false);
+        this.getMainBtt().setVisible(true);
     }
 
     /**
@@ -50,7 +53,6 @@ public class ServerFrame extends javax.swing.JFrame {
 
         controlPanel = new javax.swing.JPanel();
         mainBtt = new keeptoo.KButton();
-        pauseBtt = new keeptoo.KButton();
         nextBtt = new keeptoo.KButton();
         questionPanel = new javax.swing.JPanel();
         aBtt = new keeptoo.KButton();
@@ -68,8 +70,6 @@ public class ServerFrame extends javax.swing.JFrame {
 
         mainBtt.setText("Start");
 
-        pauseBtt.setText("Pause");
-
         nextBtt.setText("Next");
 
         javax.swing.GroupLayout controlPanelLayout = new javax.swing.GroupLayout(controlPanel);
@@ -79,9 +79,7 @@ public class ServerFrame extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlPanelLayout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(mainBtt, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                        .addComponent(pauseBtt, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(mainBtt, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(nextBtt, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
@@ -90,9 +88,7 @@ public class ServerFrame extends javax.swing.JFrame {
             .addGroup(controlPanelLayout.createSequentialGroup()
                 .addGap(45, 45, 45)
                 .addComponent(mainBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(29, 29, 29)
-                .addComponent(pauseBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(33, 33, 33)
+                .addGap(107, 107, 107)
                 .addComponent(nextBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -119,7 +115,6 @@ public class ServerFrame extends javax.swing.JFrame {
         dBtt.setkBorderRadius(50);
 
         question.setForeground(new java.awt.Color(255, 255, 255));
-        question.setText("jLabel1");
 
         counter.setForeground(new java.awt.Color(255, 255, 255));
         counter.setText("Counter");
@@ -238,7 +233,7 @@ public class ServerFrame extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        ServerFrame frame = new ServerFrame();
+        new ServerFrame();
     }
 
     public KButton getaBtt() {
@@ -313,14 +308,6 @@ public class ServerFrame extends javax.swing.JFrame {
         this.panel = panel;
     }
 
-    public KButton getPauseBtt() {
-        return pauseBtt;
-    }
-
-    public void setPauseBtt(KButton pauseBtt) {
-        this.pauseBtt = pauseBtt;
-    }
-
     public JPanel getPlayerPanel() {
         return playerPanel;
     }
@@ -361,6 +348,12 @@ public class ServerFrame extends javax.swing.JFrame {
         this.questionPanel = questionPanel;
     }
 
+    public void addPlayerToTable(Player player) {
+        DefaultTableModel dptb = (DefaultTableModel) this.getPlayerTable().getModel();
+        Object[] tmp;
+        tmp = new Object[]{this.getPlayerTable().getRowCount() + 1, player.getName(), player.getAddress()};
+        dptb.addRow(tmp);
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private keeptoo.KButton aBtt;
     private keeptoo.KButton bBtt;
@@ -371,7 +364,6 @@ public class ServerFrame extends javax.swing.JFrame {
     private keeptoo.KButton mainBtt;
     private keeptoo.KButton nextBtt;
     private keeptoo.KGradientPanel panel;
-    private keeptoo.KButton pauseBtt;
     private javax.swing.JPanel playerPanel;
     private javax.swing.JScrollPane playerScrollPane;
     private javax.swing.JTable playerTable;

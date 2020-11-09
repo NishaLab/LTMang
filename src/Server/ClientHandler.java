@@ -23,7 +23,7 @@ public class ClientHandler extends Thread {
     private Socket client;
     private Question question;
     private String response;
-
+    private int timer;
     public ObjectOutputStream getDos() {
         return dos;
     }
@@ -54,6 +54,15 @@ public class ClientHandler extends Thread {
         this.client = client;
         this.question = question;
     }
+    
+    public ClientHandler(ObjectOutputStream dos, ObjectInputStream dis, Socket client, Question question, int timer) {
+        this.dos = dos;
+        this.dis = dis;
+        this.client = client;
+        this.question = question;
+        this.timer = timer;
+    }
+
 
 
     public void setQuestion(Question question) {
@@ -66,6 +75,8 @@ public class ClientHandler extends Thread {
 
         try {
             dos.writeObject(question);
+            dos.flush();
+            dos.writeInt(timer);
             dos.flush();
 
 
