@@ -7,6 +7,7 @@ package Client;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import keeptoo.KButton;
 import keeptoo.KGradientPanel;
 
@@ -32,7 +33,7 @@ public class ClientFrame extends javax.swing.JFrame {
         }
         cc.init();
         this.setVisible(true);
-        cc.run();
+
     }
 
     /**
@@ -55,6 +56,8 @@ public class ClientFrame extends javax.swing.JFrame {
         controlPanel = new javax.swing.JPanel();
         playBtt = new keeptoo.KButton();
         exportBtt = new keeptoo.KButton();
+        nameField = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -80,7 +83,6 @@ public class ClientFrame extends javax.swing.JFrame {
         dBtt.setkBorderRadius(50);
 
         question.setForeground(new java.awt.Color(255, 255, 255));
-        question.setText("jLabel1");
 
         counter.setForeground(new java.awt.Color(255, 255, 255));
         counter.setText("Counter");
@@ -151,21 +153,38 @@ public class ClientFrame extends javax.swing.JFrame {
             }
         });
 
+        nameField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nameFieldActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("Name");
+
         javax.swing.GroupLayout controlPanelLayout = new javax.swing.GroupLayout(controlPanel);
         controlPanel.setLayout(controlPanelLayout);
         controlPanelLayout.setHorizontalGroup(
             controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, controlPanelLayout.createSequentialGroup()
                 .addContainerGap(32, Short.MAX_VALUE)
-                .addGroup(controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(exportBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(playBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(controlPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(exportBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(playBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(29, 29, 29))
         );
         controlPanelLayout.setVerticalGroup(
             controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(controlPanelLayout.createSequentialGroup()
-                .addGap(98, 98, 98)
+                .addContainerGap()
+                .addGroup(controlPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(nameField, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(46, 46, 46)
                 .addComponent(exportBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(51, 51, 51)
                 .addComponent(playBtt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -200,11 +219,17 @@ public class ClientFrame extends javax.swing.JFrame {
 
     private void aBttActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aBttActionPerformed
         // TODO add your handling code here:
+        System.out.println("Play Btn");
     }//GEN-LAST:event_aBttActionPerformed
 
     private void exportBttActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportBttActionPerformed
         // TODO add your handling code here:
+        System.out.println("ExportBtn");
     }//GEN-LAST:event_exportBttActionPerformed
+
+    private void nameFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nameFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_nameFieldActionPerformed
 
     /**
      * @param args the command line arguments
@@ -301,6 +326,22 @@ public class ClientFrame extends javax.swing.JFrame {
         this.playBtt = playBtt;
     }
 
+    public JLabel getjLabel1() {
+        return jLabel1;
+    }
+
+    public void setjLabel1(JLabel jLabel1) {
+        this.jLabel1 = jLabel1;
+    }
+
+    public JTextField getNameField() {
+        return nameField;
+    }
+
+    public void setNameField(JTextField nameField) {
+        this.nameField = nameField;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private keeptoo.KButton aBtt;
     private keeptoo.KButton bBtt;
@@ -309,7 +350,9 @@ public class ClientFrame extends javax.swing.JFrame {
     private javax.swing.JLabel counter;
     private keeptoo.KButton dBtt;
     private keeptoo.KButton exportBtt;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel mainPanel;
+    private javax.swing.JTextField nameField;
     private keeptoo.KGradientPanel panel;
     private keeptoo.KButton playBtt;
     private javax.swing.JLabel question;

@@ -17,20 +17,21 @@ import java.net.*;
 import java.util.Date;
 
 import Model.Question;
+import static Server.CustomServer.port;
 import java.text.SimpleDateFormat;
-import javax.swing.JButton;
-import javax.swing.JTable;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import keeptoo.*;
 
-public class ServerFrameController implements Runnable {
+public class ServerFrameController {
 
     private ServerFrame frame;
-
+    
     public ServerFrameController(ServerFrame frame) {
         this.frame = frame;
         try {
-            CustomServer cs = new CustomServer();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -38,8 +39,17 @@ public class ServerFrameController implements Runnable {
 
     public void init() {
         setStartBttAction();
-        setPauseBttAction();
         setNextBttAction();
+    }
+    
+    private void startCustomServer() {
+        new Thread() {
+            @Override
+            public void run() {
+                new CustomServer(frame).start();
+            }
+            
+        }.start();
     }
 
     public void setStartBttAction() {
@@ -47,30 +57,22 @@ public class ServerFrameController implements Runnable {
         start.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+                startCustomServer();
+                start.setVisible(false);
             }
         });
     }
 
     public void setNextBttAction() {
-        KButton next = frame.getMainBtt();
+        KButton next = frame.getNextBtt();
         next.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
             }
         });
     }
 
-    public void setPauseBttAction() {
-        KButton pause = frame.getMainBtt();
-        pause.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-        });
-    }
 
     public void setQuestionPanel(Question question) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -80,15 +82,4 @@ public class ServerFrameController implements Runnable {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public void addPlayerToTable(Player player) {
-        DefaultTableModel dptb = (DefaultTableModel) this.frame.getPlayerTable().getModel();
-        Object[] tmp;
-        tmp = new Object[]{player.getId(), player.getAddress()};
-        dptb.addRow(tmp);
-
-    }
-
-    public void run() {
-        // call ham main cua CustomServer tai day
-    }
 }

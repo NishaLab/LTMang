@@ -8,22 +8,32 @@ package Client;
 /**
  * @author LEGION
  */
-
+import DAO.PlayerDAO;
+import Model.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
-import java.util.Date;
+import java.util.*;
 
 import Model.Question;
+import Model.Session;
+import Server.CustomServer;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 import keeptoo.*;
 
-public class ClientController implements Runnable {
+public class ClientController {
 
     final ClientFrame frame;
     private Socket client;
+    private int remotePort;
+    private String host;
 
     private Question question;
+    private int timer;
     //    private DataOutputStream dos;
 //    private DataInputStream dis;
     private ObjectOutputStream dos;
@@ -32,19 +42,52 @@ public class ClientController implements Runnable {
 
     public ClientController(ClientFrame frame) {
         this.frame = frame;
+        host = "127.0.0.1";
+        remotePort = 5056;
+
+    }
+
+    private void connect(String host, int remotePort) {
         try {
-            this.client = new Socket("127.0.0.1", 5056);
+            this.client = new Socket(host, remotePort);
 //            this.dos = new DataOutputStream(client.getOutputStream());
 //            this.dis = new DataInputStream(client.getInputStream());
             this.dos = new ObjectOutputStream(client.getOutputStream());
             this.dis = new ObjectInputStream(client.getInputStream());
+            Player player = new Player();
+            PlayerDAO pd = new PlayerDAO();
+            this.frame.getNameField().setEditable(false);
+            player = pd.getPlayerByAddress(this.client.getRemoteSocketAddress().toString());
+            if (player.getId() == 0) {
+                player.setName(this.frame.getNameField().getText());
+                player.setAddress((this.client.getRemoteSocketAddress().toString()));
+                pd.createPlayer(player);
+            }
+            if (player.getName().compareTo(this.frame.getNameField().getText()) != 0) {
+                player.setName(this.frame.getNameField().getText());
+                pd.updatePlayerName(player);
+            }
+            this.dos.writeObject(player);
+            this.dos.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("connected");
     }
 
     public void init() {
         setButtonAction();
+    }
+
+    private void startClient() {
+        new Thread() {
+            @Override
+            public void run() {
+                connect(host, remotePort);
+                runClient();
+            }
+
+        }.start();
     }
 
     void setButtonAction() {
@@ -53,14 +96,24 @@ public class ClientController implements Runnable {
         KButton bBtt = frame.getbBtt();
         KButton cBtt = frame.getcBtt();
         KButton dBtt = frame.getdBtt();
+        KButton startBtn = frame.getExportBtt();
+
+        startBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Play btn");
+                startClient();
+                frame.getQuestion().setText("Connecting to server, Please Wait...");
+            }
+        });
         aBtt.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked A");
                 try {
-                    answer = "A";
-                    dos.writeUTF("A");
+                    answer = "1";
+                    dos.writeUTF("1");
                     dos.flush();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -72,8 +125,8 @@ public class ClientController implements Runnable {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked B");
                 try {
-                    answer = "B";
-                    dos.writeUTF("B");
+                    answer = "2";
+                    dos.writeUTF("2");
                     dos.flush();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -86,8 +139,8 @@ public class ClientController implements Runnable {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked C");
                 try {
-                    answer = "C";
-                    dos.writeUTF("C");
+                    answer = "3";
+                    dos.writeUTF("3");
                     dos.flush();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -99,8 +152,8 @@ public class ClientController implements Runnable {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Clicked D");
                 try {
-                    answer = "D";
-                    dos.writeUTF("D");
+                    answer = "4";
+                    dos.writeUTF("4");
                     dos.flush();
                 } catch (IOException ioException) {
                     ioException.printStackTrace();
@@ -109,38 +162,91 @@ public class ClientController implements Runnable {
         });
     }
 
-    public void run() {
+    public void startTimeCountdown(int time) throws InterruptedException, IOException, ExecutionException {
+        int timeLeft = time;
+        SwingWorker worker = new SwingWorker() {
+            @Override
+            protected String doInBackground() throws Exception {
+                for (int i = time; i >= 0; i--) {
+                    publish(i);
+                    Thread.sleep(1000);
+                    //System.out.println(i);
+                }
+                return "Time's up.";
+            }
+
+            @Override
+            protected void process(List chunks) {
+                int val = (int) chunks.get(chunks.size() - 1);
+
+                frame.getCounter().setText(String.valueOf(val));
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    String statusMsg = (String) get();
+                    System.out.println(statusMsg);
+                    frame.getCounter().setText(statusMsg);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    public void runClient() {
+        System.out.println("run");
         while (true) {
             answer = null;
 
             try {
-                question = (Question) dis.readObject();
-                System.out.println(question);
+                Object obj = dis.readObject();
+                if (obj instanceof String && "Game Over".equals((String) obj)) {
+                    System.out.println("read session");
+                    Session session = (Session) dis.readObject();
+                    startVictoryScreen(session);
+                    this.frame.setVisible(false);
+                } else {
+                    question = (Question) obj;
+                    timer = dis.readInt();
+                    System.out.println(timer);
+                    System.out.println(question);
+                    startTimeCountdown(timer);
 
-                frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
-                frame.getaBtt().setText("A. " + question.getAnswerA());
-                frame.getbBtt().setText("B. " + question.getAnswerB());
-                frame.getcBtt().setText("C. " + question.getAnswerC());
-                frame.getdBtt().setText("D. " + question.getAnswerD());
+                    frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
+                    frame.getaBtt().setText("A. " + question.getAnswerA());
+                    frame.getbBtt().setText("B. " + question.getAnswerB());
+                    frame.getcBtt().setText("C. " + question.getAnswerC());
+                    frame.getdBtt().setText("D. " + question.getAnswerD());
 
-                //Wait for server to send 'Time out' message
-                String timeout = dis.readUTF();
+                    //Wait for server to send 'Time out' message
+                    String timeout = dis.readUTF();
 
-
-                System.out.println(timeout + ", " + answer);
-                if (answer == null) {
-                    answer = "No answer";
-                    dos.writeUTF(answer);
-                    dos.flush();
+                    if (answer == null) {
+                        answer = "0";
+                        dos.writeUTF(answer);
+                        dos.flush();
+                    }
+                    System.out.println(timeout + ", " + answer);
                 }
 
-
             } catch (SocketException e) {
+                frame.getQuestion().setText("Server is not available.");
                 System.out.println("Server is not available.");
                 break;
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+        try {
+            dis.close();
+            dos.close();
+        } catch (IOException e) {
+            System.out.println(client.getPort() + " disconnected");
         }
 
 //        try {
@@ -196,5 +302,69 @@ public class ClientController implements Runnable {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
+    }
+
+    public void startVictoryScreen(Session s) {
+        VictoryScreenFrame vsf = new VictoryScreenFrame();
+        vsf.setVisible(true);
+        KButton mainBtt = vsf.getPlayBtt();
+        for (PlayedQuestion playedQuestion : s.getQuestion()) {
+            vsf.addPlayedQuestionToTable(playedQuestion);
+        }
+        mainBtt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                vsf.dispose();
+                frame.setVisible(true);
+            }
+        });
+        KButton exportBtt = vsf.getExportBtt();
+        exportBtt.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveHistory(s);
+                JOptionPane.showMessageDialog(null, "Export Successful");
+
+            }
+        }
+        );
+    }
+
+    public String handleAnswer(int answer) {
+        switch (answer) {
+            case 1:
+                return "A";
+            case 2:
+                return "B";
+            case 3:
+                return "C";
+            default:
+                return "D";
+        }
+    }
+
+    public void saveHistory(Session session) {
+
+        try {
+            FileWriter fw = new FileWriter("history.txt");
+            String record = "Id: " + session.getPlayer().getId() + " - "
+                    + "Address: " + session.getPlayer().getAddress() + "\n";
+
+            ArrayList<PlayedQuestion> listQuestion = session.getQuestion();
+            for (PlayedQuestion playedQuestion : listQuestion) {
+                record = "Question: " + playedQuestion.getQuestion().getTitle() + " - "
+                        + "Chosen answer: " + handleAnswer(playedQuestion.getChosenAnswer()) + " - "
+                        + "Correct answer: " + handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()) + " - "
+                        + "Time: " + playedQuestion.getTime()
+                        + "\n";
+                System.out.println(record);
+                fw.write((String) record);
+            }
+
+            fw.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        System.out.println("Success...");
     }
 }
