@@ -34,8 +34,7 @@ public class ClientController {
 
     private Question question;
     private int timer;
-    //    private DataOutputStream dos;
-//    private DataInputStream dis;
+    
     private ObjectOutputStream dos;
     private ObjectInputStream dis;
     private String answer;
@@ -43,6 +42,7 @@ public class ClientController {
     public ClientController(ClientFrame frame) {
         this.frame = frame;
         host = "127.0.0.1";
+//        host = "192.168.43.12";
         remotePort = 5056;
 
     }
@@ -50,24 +50,16 @@ public class ClientController {
     private void connect(String host, int remotePort) {
         try {
             this.client = new Socket(host, remotePort);
-//            this.dos = new DataOutputStream(client.getOutputStream());
-//            this.dis = new DataInputStream(client.getInputStream());
             this.dos = new ObjectOutputStream(client.getOutputStream());
             this.dis = new ObjectInputStream(client.getInputStream());
-            Player player = new Player();
-            PlayerDAO pd = new PlayerDAO();
+
+            String ipAddress = this.client.getRemoteSocketAddress().toString();
+            String playerName = this.frame.getNameField().getText();
+
             this.frame.getNameField().setEditable(false);
-            player = pd.getPlayerByAddress(this.client.getRemoteSocketAddress().toString());
-            if (player.getId() == 0) {
-                player.setName(this.frame.getNameField().getText());
-                player.setAddress((this.client.getRemoteSocketAddress().toString()));
-                pd.createPlayer(player);
-            }
-            if (player.getName().compareTo(this.frame.getNameField().getText()) != 0) {
-                player.setName(this.frame.getNameField().getText());
-                pd.updatePlayerName(player);
-            }
-            this.dos.writeObject(player);
+
+            this.dos.writeUTF(ipAddress);
+            this.dos.writeUTF(playerName);
             this.dos.flush();
         } catch (Exception e) {
             e.printStackTrace();
