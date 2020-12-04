@@ -132,14 +132,15 @@ public class CustomServer {
             //Init
             ObjectInputStream dis;
             ObjectOutputStream dos;
-            GameDAO gd      = new GameDAO();
-            clients         = new ArrayList<>();
-            clientHandlers  = new ArrayList<>();
-            clientAnswers   = new ArrayList<>();
-            inStreamMap     = new HashMap<>();
-            outStreamMap    = new HashMap<>();
-            sessionMap      = new HashMap<>();
-            sessions        = new ArrayList<>();
+            PlayerDAO playerDAO = new PlayerDAO();
+            GameDAO gd = new GameDAO();
+            clients = new ArrayList<>();
+            clientHandlers = new ArrayList<>();
+            clientAnswers = new ArrayList<>();
+            inStreamMap = new HashMap<>();
+            outStreamMap = new HashMap<>();
+            sessionMap = new HashMap<>();
+            sessions = new ArrayList<>();
             //        ServerSocket ss = null;
             //
             //        ss = new ServerSocket(port);
@@ -197,9 +198,9 @@ public class CustomServer {
                 try {
                     dis = new ObjectInputStream(client.getInputStream());
                     dos = new ObjectOutputStream(client.getOutputStream());
-                    Player player = new Player();
+                    Player player = createPlayer(dis, playerDAO);
                     try {
-                        player = (Player) dis.readObject();
+//                        player = (Player) dis.readObject();
                         frame.addPlayerToTable(player);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -307,110 +308,6 @@ public class CustomServer {
         }
     }
 
-    /*public static void main(String[] args) throws IOException {
-        //Init
-        ObjectInputStream dis;
-        ObjectOutputStream dos;
-        clients = new ArrayList<>();
-        clientHandlers = new ArrayList<>();
-        clientAnswers = new ArrayList<>();
-        inStreamMap = new HashMap<>();
-        outStreamMap = new HashMap<>();
-        ServerSocket ss = null;
-
-        ss = new ServerSocket(port);
-
-        QuestionDAO questionDAO = new QuestionDAO();
-        ArrayList<Question> question = questionDAO.getAllQuestion();
-
-        Thread countdownHelper = new CountdownHelper(port);
-        countdownHelper.start();
-
-        //Just receive client in 10s
-        while (true) {
-            if (isOver) break;
-            Socket client = null;
-            client = ss.accept();
-            if (client.getPort() != clientEndPort) {
-                clients.add(client);
-                System.out.println("Client " + client.getPort() + " connected to server.");
-            }
-        }
-
-        //Inputstreams, outputstreams' initialization
-        if (clients.size() == 0) {
-            System.out.println("No player.");
-            return;
-        }
-        for (Socket client : clients) {
-            dis = new ObjectInputStream(client.getInputStream());
-            dos = new ObjectOutputStream(client.getOutputStream());
-            inStreamMap.put(client, dis);
-            outStreamMap.put(client, dos);
-        }
-
-        //Loop through questions list
-        for (Question q : question) {
-
-            System.out.println(q);
-            //System.out.println("Size before clear: " + clientHandlers.size());
-            clientHandlers.clear();
-            //System.out.println("Size after clear: " + clientHandlers.size());
-
-            for (Socket client : clients) {
-                System.out.println(client);
-                dis = inStreamMap.get(client);
-                dos = outStreamMap.get(client);
-                ClientHandler thread = new ClientHandler(dos, dis, client, q);
-                clientHandlers.add(thread);
-            }
-
-
-            for (ClientHandler ch : clientHandlers) {
-                ch.start();
-            }
-            System.out.println("Get ready to answer " + q.getTitle() + "...");
-
-            try {
-                questionCountdown(timeAnswerQuest);
-                for (ClientHandler ch : clientHandlers) {
-                    dos = ch.getDos();
-//                    System.out.println(ch.getClient().getPort() + ": " + ch.getResponse());
-//                    System.out.println(ch.getClient().getPort() + ": " + ch.getState());
-                    if (ch.getResponse() == null && ch.getState() == Thread.State.TERMINATED) {
-                        Socket toBeRemoved = ch.getClient();
-                        clients.remove(toBeRemoved);
-                        inStreamMap.remove(toBeRemoved);
-                        continue;
-                    }
-                    dos.writeUTF("Time out");
-                    //System.out.println(ch.getDis());
-                    dos.flush();
-
-
-                }
-                //System.out.println("hi");
-                clientAnswerHandler(q);
-                System.out.println("Waiting for 3 seconds to continue...");
-                System.out.println("Size: " + clientAnswers.size());
-                Thread.sleep(3000);
-
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (SocketException e) {
-                System.out.println("No more client");
-            }
-        }
-
-        System.out.println("Answers: ");
-        for (String ans : clientAnswers) {
-            System.out.println(ans);
-        }
-
-
-        System.out.println("Game over.");
-    } */
     //Get all the answers
     private static void clientAnswerHandler(Question q) {
         for (ClientHandler ch : clientHandlers) {
@@ -453,6 +350,26 @@ public class CustomServer {
         DefaultTableModel dtm = (DefaultTableModel) frame.getPlayerTable().getModel();
         dtm.setRowCount(0);
         frame.getMainBtt().setVisible(true);
+    }
+
+    private Player createPlayer(ObjectInputStream ois, PlayerDAO playerDAO) throws IOException {
+        String ipAddress = ois.readUTF();
+        String playerName = ois.readUTF();
+        System.out.println(ipAddress + "      " + playerName);
+
+        Player player = playerDAO.getPlayerByAddress(ipAddress);
+        System.out.println(player);
+        if (player.getId() == 0) {
+            player.setName(playerName);
+            player.setAddress((ipAddress));
+            playerDAO.createPlayer(player);
+
+        }
+        if (player.getName().compareTo(playerName) != 0) {
+            player.setName(playerName);
+            playerDAO.updatePlayerName(player);
+        }
+        return player;
     }
 
 }
