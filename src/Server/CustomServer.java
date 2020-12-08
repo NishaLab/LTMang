@@ -9,6 +9,8 @@ import DAO.*;
 import Helper.CountdownHelper;
 import Model.*;
 import Server.ServerFrameController;
+
+import javax.print.attribute.standard.PDLOverrideSupported;
 import javax.swing.*;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
@@ -40,12 +42,18 @@ public class CustomServer {
     private static HashMap<Socket, ObjectInputStream> inStreamMap;
     //Map session to client
     private static HashMap<Socket, Session> sessionMap;
+    //
+    private HashMap<Socket, ClientHandler> clientThreadMap;
+    //
+    private ObjectInputStream dis;
+    private ObjectOutputStream dos;
     //check if time to connect to server is over
     private static boolean isOver;
     final static int port = 5056;
     public final static int clientEndPort = 2113;
     private final ServerFrame frame;
     private ActionListener countdown;
+    private boolean isPause;
 
     final static int timeAnswerQuest = 15; //sec
     public final static int timeConnectToServer = 10; //sec
@@ -54,19 +62,48 @@ public class CustomServer {
         this.frame = frame;
     }
 
-    private void questionCountdown(int time) throws InterruptedException, IOException {
+    private void questionCountdown(int time, Question q) throws InterruptedException, IOException {
         System.out.println("You have 15 seconds to send your answer to server...");
-
         while (time > 0) {
-            System.out.println(time);
-            frame.getCounter().setText(Integer.toString(time));
+            System.out.println("pause?" + isPause);
+            if (!isPause) {
+                frame.getCounter().setText(Integer.toString(time));
 
-            Thread.sleep(1000);
-            time--;
+                Thread.sleep(1000);
+                time--;
+            } else {
+                System.out.println("pause");
+
+
+                for (Socket client : clients) {
+                    System.out.println("state: " + clientThreadMap.get(client).getState());
+                    if (clientThreadMap.get(client).getState() != Thread.State.TERMINATED) {
+
+                        System.out.println(client.getPort());
+                        clientThreadMap.get(client).getDos().writeUTF("Pause");
+                        clientThreadMap.get(client).getDos().flush();
+                    }
+                }
+                Thread.sleep(10000);
+                isPause = false;
+                for (Socket client : clients) {
+                    if (clientThreadMap.get(client).getState() == Thread.State.TERMINATED) {
+                        ClientHandler newThread = new ClientHandler(outStreamMap.get(client),
+                                inStreamMap.get(client), client, q, time, this);
+                        newThread.start();
+                        clientThreadMap.put(client, newThread);
+                    }
+                }
+
+            }
         }
 
         System.out.println("Time up!");
         frame.getQuestion().setText("Time up");
+    }
+
+    public void setPause(boolean isPause) {
+        this.isPause = isPause;
     }
 
     public void setOver(boolean over) {
@@ -130,8 +167,6 @@ public class CustomServer {
         try {
             //System.out.println("custom server: " + Thread.currentThread().getName());
             //Init
-            ObjectInputStream dis;
-            ObjectOutputStream dos;
             PlayerDAO playerDAO = new PlayerDAO();
             GameDAO gd = new GameDAO();
             clients = new ArrayList<>();
@@ -141,6 +176,7 @@ public class CustomServer {
             outStreamMap = new HashMap<>();
             sessionMap = new HashMap<>();
             sessions = new ArrayList<>();
+            clientThreadMap = new HashMap<>();
             //        ServerSocket ss = null;
             //
             //        ss = new ServerSocket(port);
@@ -217,13 +253,15 @@ public class CustomServer {
                 //System.out.println("Size before clear: " + clientHandlers.size());
                 clientHandlers.clear();
                 //System.out.println("Size after clear: " + clientHandlers.size());
+                clientThreadMap.clear();
 
                 for (Socket client : clients) {
                     System.out.println(client);
                     dis = inStreamMap.get(client);
                     dos = outStreamMap.get(client);
-                    ClientHandler thread = new ClientHandler(dos, dis, client, q, timeAnswerQuest);
+                    ClientHandler thread = new ClientHandler(dos, dis, client, q, timeAnswerQuest, this);
                     clientHandlers.add(thread);
+                    clientThreadMap.put(client, thread);
                 }
 
                 for (ClientHandler ch : clientHandlers) {
@@ -232,7 +270,7 @@ public class CustomServer {
                 System.out.println("Get ready to answer " + q.getTitle() + "...");
 
                 try {
-                    questionCountdown(timeAnswerQuest);
+                    questionCountdown(timeAnswerQuest, q);
                     for (ClientHandler ch : clientHandlers) {
                         dos = ch.getDos();
                         //                    System.out.println(ch.getClient().getPort() + ": " + ch.getResponse());
