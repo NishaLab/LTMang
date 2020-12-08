@@ -144,7 +144,7 @@ public class ClientFrame extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        playBtt.setText("Export Data");
+        playBtt.setText("Pause");
 
         exportBtt.setText("Play");
         exportBtt.addActionListener(new java.awt.event.ActionListener() {
