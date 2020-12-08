@@ -65,33 +65,35 @@ public class CustomServer {
     private void questionCountdown(int time, Question q) throws InterruptedException, IOException {
         System.out.println("You have 15 seconds to send your answer to server...");
         while (time > 0) {
-            System.out.println("pause?" + isPause);
+//            System.out.println("pause?" + isPause);
             if (!isPause) {
                 frame.getCounter().setText(Integer.toString(time));
-
                 Thread.sleep(1000);
                 time--;
             } else {
                 System.out.println("pause");
-
-
                 for (Socket client : clients) {
                     System.out.println("state: " + clientThreadMap.get(client).getState());
-                    if (clientThreadMap.get(client).getState() != Thread.State.TERMINATED) {
-
-                        System.out.println(client.getPort());
-                        clientThreadMap.get(client).getDos().writeUTF("Pause");
-                        clientThreadMap.get(client).getDos().flush();
-                    }
+//                    if (clientThreadMap.get(client).getState() != Thread.State.TERMINATED) {
+//
+////                        System.out.println(client.getPort());
+//                        clientThreadMap.get(client).getDos().writeUTF("Pause");
+//                        clientThreadMap.get(client).getDos().flush();
+//                    }
+                    clientThreadMap.get(client).getDos().writeUTF("Pause");
+                    clientThreadMap.get(client).getDos().flush();
                 }
                 Thread.sleep(10000);
                 isPause = false;
                 for (Socket client : clients) {
-                    if (clientThreadMap.get(client).getState() == Thread.State.TERMINATED) {
+                    ClientHandler oldThread = clientThreadMap.get(client);
+                    if (oldThread.getState() == Thread.State.TERMINATED && oldThread.getResponse().equals("-1")) {
+                        clientHandlers.remove(oldThread);
                         ClientHandler newThread = new ClientHandler(outStreamMap.get(client),
                                 inStreamMap.get(client), client, q, time, this);
                         newThread.start();
                         clientThreadMap.put(client, newThread);
+                        clientHandlers.add(newThread);
                     }
                 }
 
