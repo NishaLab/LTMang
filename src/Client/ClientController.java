@@ -8,8 +8,10 @@ package Client;
 /**
  * @author LEGION
  */
+
 import DAO.PlayerDAO;
 import Model.*;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -19,10 +21,12 @@ import java.util.*;
 import Model.Question;
 import Model.Session;
 import Server.CustomServer;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+
 import keeptoo.*;
 
 public class ClientController {
@@ -34,10 +38,11 @@ public class ClientController {
 
     private Question question;
     private int timer;
-    
+
     private ObjectOutputStream dos;
     private ObjectInputStream dis;
     private String answer;
+    private boolean isPause;
 
     public ClientController(ClientFrame frame) {
         this.frame = frame;
@@ -89,6 +94,7 @@ public class ClientController {
         KButton cBtt = frame.getcBtt();
         KButton dBtt = frame.getdBtt();
         KButton startBtn = frame.getExportBtt();
+        KButton pauseBtn = frame.getPlayBtt();
 
         startBtn.addActionListener(new ActionListener() {
             @Override
@@ -96,6 +102,21 @@ public class ClientController {
                 System.out.println("Play btn");
                 startClient();
                 frame.getQuestion().setText("Connecting to server, Please Wait...");
+            }
+        });
+
+        pauseBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    dos.writeUTF("-1");
+                    dos.flush();
+                    isPause = true;
+                    frame.getQuestion().setText("Game pause!");
+                } catch (IOException ex) {
+
+                }
+
             }
         });
         aBtt.addActionListener(new ActionListener() {
@@ -154,14 +175,22 @@ public class ClientController {
         });
     }
 
-    public void startTimeCountdown(int time) throws InterruptedException, IOException, ExecutionException {
+    public void startTimeCountdown(int time, Question q) throws InterruptedException, IOException, ExecutionException {
         int timeLeft = time;
         SwingWorker worker = new SwingWorker() {
             @Override
             protected String doInBackground() throws Exception {
                 for (int i = time; i >= 0; i--) {
-                    publish(i);
-                    Thread.sleep(1000);
+                    if (!isPause) {
+                        publish(i);
+                        Thread.sleep(1000);
+                    } else {
+                        System.out.println("pause");
+                        Thread.sleep(10000);
+                        frame.getQuestion().setText(q.getTitle() + ": " + q.getQuestionContent());
+                        isPause = false;
+                    }
+
                     //System.out.println(i);
                 }
                 return "Time's up.";
@@ -194,7 +223,7 @@ public class ClientController {
         System.out.println("run");
         while (true) {
             answer = null;
-
+            isPause = false;
             try {
                 Object obj = dis.readObject();
                 if (obj instanceof String && "Game Over".equals((String) obj)) {
@@ -207,7 +236,7 @@ public class ClientController {
                     timer = dis.readInt();
                     System.out.println(timer);
                     System.out.println(question);
-                    startTimeCountdown(timer);
+                    startTimeCountdown(timer, question);
 
                     frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
                     frame.getaBtt().setText("A. " + question.getAnswerA());
@@ -216,7 +245,13 @@ public class ClientController {
                     frame.getdBtt().setText("D. " + question.getAnswerD());
                     //Wait for server to send 'Time out' message
                     String timeout = dis.readUTF();
-
+                    System.out.println("timeout: " + timeout);
+                    if (timeout.equals("Pause")) {
+                        System.out.println("pause is real");
+                        frame.getQuestion().setText("Game Pause!");
+                        isPause = true;
+                        dis.readUTF();
+                    }
                     if (answer == null) {
                         answer = "0";
                         dos.writeUTF(answer);
@@ -258,13 +293,13 @@ public class ClientController {
         });
         KButton exportBtt = vsf.getExportBtt();
         exportBtt.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveHistory(s);
-                JOptionPane.showMessageDialog(null, "Export Successful");
+                                        @Override
+                                        public void actionPerformed(ActionEvent e) {
+                                            saveHistory(s);
+                                            JOptionPane.showMessageDialog(null, "Export Successful");
 
-            }
-        }
+                                        }
+                                    }
         );
     }
 
