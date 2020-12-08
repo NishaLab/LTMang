@@ -5,13 +5,14 @@ import Model.Question;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-public class QuestionHandler extends Thread{
+public class QuestionHandler extends Thread {
     private Question question;
     private ObjectOutputStream oos;
     private int questionTimer;
+
     public QuestionHandler(Question question, ObjectOutputStream oos, int questionTimer) {
         this.question = question;
-        this.oos=oos;
+        this.oos = oos;
         this.questionTimer = questionTimer;
     }
 
