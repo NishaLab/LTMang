@@ -35,6 +35,7 @@ public class ClientController {
     private Socket client;
     private int remotePort;
     private String host;
+    private int pauseRemaining;
 
     private Question question;
     private int timer;
@@ -54,6 +55,7 @@ public class ClientController {
 
     private void connect(String host, int remotePort) {
         try {
+            pauseRemaining = 5;
             this.client = new Socket(host, remotePort);
             this.dos = new ObjectOutputStream(client.getOutputStream());
             this.dis = new ObjectInputStream(client.getInputStream());
@@ -101,21 +103,28 @@ public class ClientController {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Play btn");
                 startClient();
-                frame.getQuestion().setText("Connecting to server, Please Wait...");
+                frame.getQuestion().setText("Connected to server, waiting for the game to start...");
             }
         });
 
         pauseBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    dos.writeUTF("-1");
-                    dos.flush();
-                    isPause = true;
-                    frame.getQuestion().setText("Game pause!");
-                } catch (IOException ex) {
+                if (pauseRemaining>0) {
+                    try {
+                        dos.writeUTF("-1");
+                        dos.flush();
+                        isPause = true;
+                        pauseRemaining--;
+                        frame.getQuestion().setText("Game pause! You have " + pauseRemaining + " pause requests remaining.");
+                    } catch (IOException ex) {
 
+                    }
+                } else {
+                    frame.getQuestion().setText("You have no more chance to pause!");
+                    frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
                 }
+
 
             }
         });
@@ -181,6 +190,7 @@ public class ClientController {
             @Override
             protected String doInBackground() throws Exception {
                 for (int i = time; i >= 0; i--) {
+                    System.out.println(isPause);
                     if (!isPause) {
                         publish(i);
                         Thread.sleep(1000);
@@ -247,12 +257,16 @@ public class ClientController {
                     String timeout = dis.readUTF();
                     System.out.println("timeout: " + timeout);
                     if (timeout.equals("Pause")) {
-                        System.out.println("pause is real");
-                        frame.getQuestion().setText("Game Pause!");
+//                        System.out.println("pause is real");
+//                        frame.getQuestion().setText("Game Pause!");
                         isPause = true;
+//                        Thread.sleep(10000);
                         dis.readUTF();
+                        continue;
                     }
+
                     if (answer == null) {
+                        System.out.println("go here");
                         answer = "0";
                         dos.writeUTF(answer);
                         dos.flush();
@@ -264,7 +278,11 @@ public class ClientController {
                 frame.getQuestion().setText("Server is not available.");
                 System.out.println("Server is not available.");
                 break;
-            } catch (Exception e) {
+            } catch (EOFException e) {
+                System.out.println("pause time");
+//                e.printStackTrace();
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
         }
