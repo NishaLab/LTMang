@@ -20,7 +20,7 @@ public class DAO {
     public DAO() {
         String url = "jdbc:mysql://localhost:3306/ltm?useSSL=false";
         String username = "root";
-        String password = "0963063105";
+        String password = "12022020";
         try {
             conn = DriverManager.getConnection(url, username, password);
 //            conn.setAutoCommit(false);

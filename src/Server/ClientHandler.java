@@ -24,6 +24,7 @@ public class ClientHandler extends Thread {
     private Question question;
     private String response;
     private int timer;
+
     public ObjectOutputStream getDos() {
         return dos;
     }
@@ -73,21 +74,20 @@ public class ClientHandler extends Thread {
     @Override
     public void run() {
 
+        //            dos.writeObject(question);
+//            dos.flush();
+//            dos.writeInt(timer);
+//            dos.flush();
+        new QuestionHandler(question, dos, timer).start();
+        ResultHandler resultHandler = new ResultHandler(dis);
+        resultHandler.start();
         try {
-            dos.writeObject(question);
-            dos.flush();
-            dos.writeInt(timer);
-            dos.flush();
-
-
-            response = dis.readUTF();
-
-            //System.out.println(response);
-            System.out.println(question.getTitle() + " " + response);
-
-        } catch (IOException e) {
-
+            resultHandler.join();
+            response = resultHandler.getResult();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+//        System.out.println(question.getTitle() + " " + response);
 
 
         System.out.println("Thread's life end.");

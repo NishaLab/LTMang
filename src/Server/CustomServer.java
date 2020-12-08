@@ -169,31 +169,19 @@ public class CustomServer {
                 }
             }
 
-            //System.out.println("hello");
             //remove the last element
             if (clients.size() > 0) {
                 clients.remove(clients.size() - 1);
             }
 
             frame.getQuestion().setText("Let's start!");
-            //System.out.println("Server connect closed.");
-
-            //        //Just receive client in 10s
-            //        while (true) {
-            //            if (isOver) break;
-            //            Socket client = null;
-            //            client = ss.accept();
-            //            if (client.getPort() != clientEndPort) {
-            //                clients.add(client);
-            //                System.out.println("Client " + client.getPort() + " connected to server.");
-            //            }
-            //        }
-            //Inputstreams, outputstreams' initialization
+            //check and return if no client
             if (clients.size() == 0) {
                 System.out.println("No player.");
                 frame.getQuestion().setText("No player");
                 return;
             }
+            //Inputstreams, outputstreams' initialization
             for (Socket client : clients) {
                 try {
                     dis = new ObjectInputStream(client.getInputStream());
@@ -250,12 +238,11 @@ public class CustomServer {
                         //                    System.out.println(ch.getClient().getPort() + ": " + ch.getResponse());
                         //                    System.out.println(ch.getClient().getPort() + ": " + ch.getState());
                         if (ch.getResponse() == null && ch.getState() == Thread.State.TERMINATED) {
-                            Socket toBeRemoved = ch.getClient();
-                            clients.remove(toBeRemoved);
-                            inStreamMap.remove(toBeRemoved);
+                            //Client closed app
+                            Socket clientToBeRemoved = ch.getClient();
+                            clients.remove(clientToBeRemoved);
+                            inStreamMap.remove(clientToBeRemoved);
                             continue;
-                        } else {
-                            System.out.println(ch.getResponse());
                         }
                         dos.writeUTF("Time out");
                         //System.out.println(ch.getDis());
@@ -264,8 +251,9 @@ public class CustomServer {
                     }
                     //System.out.println("hi");
                     clientAnswerHandler(q);
-                    System.out.println("Waiting for 3 seconds to continue...");
-                    System.out.println("Size: " + clientAnswers.size());
+                    frame.getQuestion().setText("Get ready for next question...");
+                    Thread.sleep(3000);
+//                    System.out.println("Size: " + clientAnswers.size());
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -277,12 +265,12 @@ public class CustomServer {
                 }
             }
 
-            System.out.println("Answers: ");
-            String answer = "";
-            for (String ans : clientAnswers) {
-                answer += ans + "\n";
-                System.out.println(ans);
-            }
+//            System.out.println("Answers: ");
+//            String answer = "";
+//            for (String ans : clientAnswers) {
+//                answer += ans + "\n";
+//                System.out.println(ans);
+//            }
 //            frame.getQuestion().setText(answer + "\nGame over.");
             for (Socket client : clients) {
                 sessions.add(sessionMap.get(client));

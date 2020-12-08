@@ -214,7 +214,6 @@ public class ClientController {
                     frame.getbBtt().setText("B. " + question.getAnswerB());
                     frame.getcBtt().setText("C. " + question.getAnswerC());
                     frame.getdBtt().setText("D. " + question.getAnswerD());
-
                     //Wait for server to send 'Time out' message
                     String timeout = dis.readUTF();
 
@@ -241,59 +240,6 @@ public class ClientController {
             System.out.println(client.getPort() + " disconnected");
         }
 
-//        try {
-//            sizeOfQuestionList = dis.readInt();
-//            System.out.println(sizeOfQuestionList);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        while (true) {
-//            if (sizeOfQuestionList == 0) {
-//                break;
-//            }
-//            isTimedout = false;
-//            try {
-//                //String questionContent = dis.readUTF();
-//                Question question = (Question) dis.readObject();
-//                String questionContent = question.getQuestionContent();
-//                frame.getQuestion().setText(question.getTitle() + ": " + questionContent);
-//                String answerA = question.getAnswerA();
-//                String answerB = question.getAnswerB();
-//                String answerC = question.getAnswerC();
-//                String answerD = question.getAnswerD();
-//                start = new Date();
-//                System.out.println(questionContent);
-////                String answerA = dis.readUTF();
-////                String answerB = dis.readUTF();
-////                String answerC = dis.readUTF();
-////                String answerD = dis.readUTF();
-//                Thread.sleep(15000);
-//
-//
-//                dos.writeUTF("No answer");
-//                dos.flush();
-//                System.out.println(question.getTitle() + ": \n"
-//                        + " A. " + answerA + " B. " + answerB
-//                        + " C. " + answerC + " D. " + answerD);
-//                sizeOfQuestionList--;
-//            } catch (Exception e) {
-//                System.out.println(e.getMessage());
-//                try {
-//
-//                    this.client.close();
-//
-//                } catch (Exception f) {
-//                }
-//            }
-//        }
-//        try {
-//            dis.close();
-//            dos.close();
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     public void startVictoryScreen(Session s) {
