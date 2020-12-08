@@ -24,6 +24,16 @@ public class ClientHandler extends Thread {
     private Question question;
     private String response;
     private int timer;
+    private CustomServer mainServer;
+
+    public ClientHandler(ObjectOutputStream dos, ObjectInputStream dis, Socket client, Question question, int timer, CustomServer mainServer) {
+        this.dos = dos;
+        this.dis = dis;
+        this.client = client;
+        this.question = question;
+        this.timer = timer;
+        this.mainServer = mainServer;
+    }
 
     public ObjectOutputStream getDos() {
         return dos;
@@ -55,7 +65,7 @@ public class ClientHandler extends Thread {
         this.client = client;
         this.question = question;
     }
-    
+
     public ClientHandler(ObjectOutputStream dos, ObjectInputStream dis, Socket client, Question question, int timer) {
         this.dos = dos;
         this.dis = dis;
@@ -63,7 +73,6 @@ public class ClientHandler extends Thread {
         this.question = question;
         this.timer = timer;
     }
-
 
 
     public void setQuestion(Question question) {
@@ -79,11 +88,12 @@ public class ClientHandler extends Thread {
 //            dos.writeInt(timer);
 //            dos.flush();
         new QuestionHandler(question, dos, timer).start();
-        ResultHandler resultHandler = new ResultHandler(dis);
+        ResultHandler resultHandler = new ResultHandler(dis, mainServer);
         resultHandler.start();
         try {
             resultHandler.join();
             response = resultHandler.getResult();
+            System.out.println("response: " + response);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
