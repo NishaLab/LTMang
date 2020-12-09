@@ -85,17 +85,20 @@ public class CustomServer {
                 }
                 Thread.sleep(10000);
                 isPause = false;
-                for (Socket client : clients) {
-                    ClientHandler oldThread = clientThreadMap.get(client);
-                    if (oldThread.getState() == Thread.State.TERMINATED && oldThread.getResponse().equals("-1")) {
-                        clientHandlers.remove(oldThread);
-                        ClientHandler newThread = new ClientHandler(outStreamMap.get(client),
-                                inStreamMap.get(client), client, q, time, this);
-                        System.out.println("123");
-                        newThread.start();
-                        clientThreadMap.put(client, newThread);
-                        clientHandlers.add(newThread);
-                    }
+//                for (Socket client : clients) {
+//                    ClientHandler oldThread = clientThreadMap.get(client);
+//                    if (oldThread.getState() == Thread.State.TERMINATED && oldThread.getResponse().equals("-1")) {
+//                        clientHandlers.remove(oldThread);
+//                        ClientHandler newThread = new ClientHandler(outStreamMap.get(client),
+//                                inStreamMap.get(client), client, q, time, this);
+//                        newThread.start();
+//                        clientThreadMap.put(client, newThread);
+//                        clientHandlers.add(newThread);
+//                    }
+//                }
+                for (ClientHandler clientHandler : clientHandlers) {
+                    clientHandler.getDos().writeObject(q);
+                    clientHandler.getDos().writeInt(0);
                 }
 
             }
@@ -345,12 +348,13 @@ public class CustomServer {
             String finalAnswer = ch.getClient().getPort() + ";" + q.getTitle() + ";";
             PlayedQuestion pq = new PlayedQuestion();
             pq.setQuestion(q);
-            if (ch.getState() == Thread.State.RUNNABLE) {
-                //System.out.println(ch.getClient().getPort() + "; " + ch.getState());
-                while (ans == null) {
-                    ans = ch.getResponse();
-                }
+//            System.out.println(ch.getState());
+
+            while (ans == null) {
+                ans = ch.getResponse();
             }
+
+            System.out.println("answer get: " + ans);
             if (ans != null) {
                 pq.setChosenAnswer(Integer.parseInt(ans));
                 if (pq.getQuestion().getCorrectAnswer() == pq.getChosenAnswer()) {

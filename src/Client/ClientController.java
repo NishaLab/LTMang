@@ -190,15 +190,15 @@ public class ClientController {
             @Override
             protected String doInBackground() throws Exception {
                 for (int i = time; i >= 0; i--) {
-                    System.out.println(isPause);
+//                    System.out.println(isPause);
                     if (!isPause) {
                         publish(i);
                         Thread.sleep(1000);
                     } else {
-                        System.out.println("pause");
                         Thread.sleep(10000);
                         frame.getQuestion().setText(q.getTitle() + ": " + q.getQuestionContent());
                         isPause = false;
+//                        break;
                     }
 
                     //System.out.println(i);
@@ -232,10 +232,10 @@ public class ClientController {
     public void runClient() {
         System.out.println("run");
         while (true) {
-            answer = null;
             isPause = false;
             try {
                 Object obj = dis.readObject();
+//                System.out.println("received: " + obj);
                 if (obj instanceof String && "Game Over".equals((String) obj)) {
                     System.out.println("read session");
                     Session session = (Session) dis.readObject();
@@ -257,11 +257,8 @@ public class ClientController {
                     String timeout = dis.readUTF();
                     System.out.println("timeout: " + timeout);
                     if (timeout.equals("Pause")) {
-//                        System.out.println("pause is real");
-//                        frame.getQuestion().setText("Game Pause!");
                         isPause = true;
-//                        Thread.sleep(10000);
-                        dis.readUTF();
+                        Thread.sleep(10000);
                         continue;
                     }
 
@@ -270,8 +267,18 @@ public class ClientController {
                         answer = "0";
                         dos.writeUTF(answer);
                         dos.flush();
+                        dos.writeUTF("over");
+                        dos.flush();
+                    } else {
+                        System.out.println("over written!");
+                        if (answer=="0") dos.writeUTF(answer);
+                        dos.writeUTF("over");
+                        dos.flush();
                     }
                     System.out.println(timeout + ", " + answer);
+
+
+
                 }
 
             } catch (SocketException e) {
