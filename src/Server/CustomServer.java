@@ -91,6 +91,7 @@ public class CustomServer {
                         clientHandlers.remove(oldThread);
                         ClientHandler newThread = new ClientHandler(outStreamMap.get(client),
                                 inStreamMap.get(client), client, q, time, this);
+                        System.out.println("123");
                         newThread.start();
                         clientThreadMap.put(client, newThread);
                         clientHandlers.add(newThread);
