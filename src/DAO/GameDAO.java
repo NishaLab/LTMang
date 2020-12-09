@@ -57,6 +57,7 @@ public class GameDAO extends DAO {
             if (generatedKeys.next()) {
                 game.setId(generatedKeys.getInt(1));
                 for (Session session : game.getSessions()) {
+                    System.out.println("player ID: " + session.getPlayer().getId());
                     ps = conn.prepareStatement(sessionSQL, Statement.RETURN_GENERATED_KEYS);
                     ps.setInt(1, session.getPlayer().getId());
                     ps.setInt(2, game.getId());
