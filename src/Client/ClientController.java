@@ -185,19 +185,21 @@ public class ClientController {
     }
 
     public void startTimeCountdown(int time, Question q) throws InterruptedException, IOException, ExecutionException {
-        int timeLeft = time;
+
+
         SwingWorker worker = new SwingWorker() {
+            boolean willWrite =  (time != 0);
             @Override
             protected String doInBackground() throws Exception {
-                for (int i = time; i >= 0; i--) {
+                for (int i = time; i > 0; i--) {
 //                    System.out.println(isPause);
                     if (!isPause) {
                         publish(i);
                         Thread.sleep(1000);
                     } else {
                         Thread.sleep(10000);
-                        frame.getQuestion().setText(q.getTitle() + ": " + q.getQuestionContent());
                         isPause = false;
+                        Thread.sleep(1000);
 //                        break;
                     }
 
@@ -218,7 +220,7 @@ public class ClientController {
                 try {
                     String statusMsg = (String) get();
                     System.out.println(statusMsg);
-                    frame.getCounter().setText(statusMsg);
+                    if (willWrite) frame.getCounter().setText(statusMsg);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
@@ -232,7 +234,7 @@ public class ClientController {
     public void runClient() {
         System.out.println("run");
         while (true) {
-            isPause = false;
+//            isPause = false;
             try {
                 Object obj = dis.readObject();
 //                System.out.println("received: " + obj);
@@ -244,10 +246,10 @@ public class ClientController {
                 } else {
                     question = (Question) obj;
                     timer = dis.readInt();
-                    System.out.println(timer);
-                    System.out.println(question);
+//                    System.out.println(timer);
+//                    System.out.println(question);
                     startTimeCountdown(timer, question);
-
+//                    System.out.println("Time to set text");
                     frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
                     frame.getaBtt().setText("A. " + question.getAnswerA());
                     frame.getbBtt().setText("B. " + question.getAnswerB());
@@ -255,27 +257,28 @@ public class ClientController {
                     frame.getdBtt().setText("D. " + question.getAnswerD());
                     //Wait for server to send 'Time out' message
                     String timeout = dis.readUTF();
-                    System.out.println("timeout: " + timeout);
+//                    System.out.println("timeout: " + timeout);
                     if (timeout.equals("Pause")) {
                         isPause = true;
-                        Thread.sleep(10000);
+//                        Thread.sleep(10000);
+//                        frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
                         continue;
                     }
 
                     if (answer == null) {
-                        System.out.println("go here");
+//                        System.out.println("go here");
                         answer = "0";
                         dos.writeUTF(answer);
                         dos.flush();
                         dos.writeUTF("over");
                         dos.flush();
                     } else {
-                        System.out.println("over written!");
+//                        System.out.println("over written!");
                         if (answer=="0") dos.writeUTF(answer);
                         dos.writeUTF("over");
                         dos.flush();
                     }
-                    System.out.println(timeout + ", " + answer);
+//                    System.out.println(timeout + ", " + answer);
 
 
 
@@ -286,7 +289,7 @@ public class ClientController {
                 System.out.println("Server is not available.");
                 break;
             } catch (EOFException e) {
-                System.out.println("pause time");
+                System.out.println("...");
 //                e.printStackTrace();
             }
             catch (Exception e) {
@@ -363,6 +366,6 @@ public class ClientController {
         } catch (Exception e) {
             System.out.println(e);
         }
-        System.out.println("Success...");
+        System.out.println("Saved!");
     }
 }
