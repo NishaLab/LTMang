@@ -45,12 +45,11 @@ public class GameDAO extends DAO {
         PlayedQuestionDAO pqd = new PlayedQuestionDAO();
         String sessionSQL = "INSERT INTO tblsession(Player_id, tblGame_id) VALUES(?,?)";
         String playedQuestionSQL = "INSERT INTO tblplayedquestion(isCorrect, Question_id, Session_id, time, chosenAnswer) VALUES(?,?,?,?,?)";
-
         try {
             conn.setAutoCommit(false);
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            java.sql.Date sqldate = new Date(game.getPlayDate().getTime());
-            ps.setDate(1, sqldate);
+            java.sql.Timestamp sqldate = new java.sql.Timestamp(game.getPlayDate().getTime());
+            ps.setTimestamp(1, sqldate);
             ps.executeUpdate();
             ResultSet generatedKeys = ps.getGeneratedKeys();
             System.out.println("Pass create Game");
