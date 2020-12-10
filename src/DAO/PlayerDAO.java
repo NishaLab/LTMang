@@ -35,7 +35,7 @@ public class PlayerDAO extends DAO {
     }
 
     public void updatePlayerName(Player player) {
-        String sql = "UPDATE `tblplayer` SET `name` = '?' WHERE (`id` = ?)";
+        String sql = "UPDATE `tblplayer` SET `name` = ? WHERE (`id` = ?)";
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, player.getName());
@@ -67,7 +67,7 @@ public class PlayerDAO extends DAO {
 
     public boolean createPlayer(Player player) {
         try {
-            String sql = "INSERT INTO tblPlayer(name, address) VALUES(?,?)";
+            String sql = "INSERT INTO tblplayer(name, address) VALUES(?,?)";
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, player.getName());
             ps.setString(2, player.getAddress());

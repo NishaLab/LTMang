@@ -32,7 +32,7 @@ public class ResultHandler extends Thread {
                     mainServer.setPause(true);
                     continue;
                 } else if(temp.equals("over")) {
-//                    System.out.println("over" + result);
+//                    System.out.println("over: " + result);
                     break;
                 }
                 result = temp;
