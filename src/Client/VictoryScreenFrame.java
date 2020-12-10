@@ -49,6 +49,11 @@ public class VictoryScreenFrame extends javax.swing.JFrame {
         controlPanel.setBackground(new java.awt.Color(255, 255, 255));
 
         exportBtt.setText("Export Details Result");
+        exportBtt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportBttActionPerformed(evt);
+            }
+        });
 
         playBtt.setText("Play Again");
         playBtt.addActionListener(new java.awt.event.ActionListener() {
@@ -141,6 +146,10 @@ public class VictoryScreenFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
         System.out.println("ExportBtn");
     }//GEN-LAST:event_playBttActionPerformed
+
+    private void exportBttActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportBttActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_exportBttActionPerformed
     public void addPlayedQuestionToTable(PlayedQuestion pq) {
         DefaultTableModel dptb = (DefaultTableModel) this.getjTable1().getModel();
         Object[] tmp;

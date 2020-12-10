@@ -24,6 +24,10 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import keeptoo.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ClientController {
 
@@ -229,6 +233,9 @@ public class ClientController {
                 frame.getQuestion().setText("Server is not available.");
                 System.out.println("Server is not available.");
                 break;
+            } catch (EOFException e) {
+                System.out.println("pause time");
+//                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -261,6 +268,7 @@ public class ClientController {
             @Override
             public void actionPerformed(ActionEvent e) {
                 saveHistory(s);
+                WriteFileExcel(s);
                 JOptionPane.showMessageDialog(null, "Export Successful");
 
             }
@@ -304,5 +312,55 @@ public class ClientController {
             System.out.println(e);
         }
         System.out.println("Success...");
+    }
+
+    public void WriteFileExcel(Session session) {
+        System.out.println("Create file excel");
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Play History");
+        int rowNum = 0;
+        Row firstRow = sheet.createRow(rowNum++);
+        Cell firstCell = firstRow.createCell(0);
+        firstCell.setCellValue("List of player");
+        List<PlayedQuestion> listOfPlayedQuestion = session.getQuestion();;
+
+        Row header = sheet.createRow(rowNum++);
+        Cell cellHeader1 = header.createCell(0);
+        cellHeader1.setCellValue("Question");
+        Cell cellHeader2 = header.createCell(1);
+        cellHeader2.setCellValue("Chosen answer");
+        Cell cellHeader3 = header.createCell(2);
+        cellHeader3.setCellValue("Correct answer");
+        Cell cellHeader4 = header.createCell(3);
+        cellHeader4.setCellValue("Is correct");
+
+        for (PlayedQuestion playedQuestion : listOfPlayedQuestion) {
+            System.out.println(
+                    "Question: " + playedQuestion.getQuestion().getTitle() + " - "
+                    + "Chosen answer: " + handleAnswer(playedQuestion.getChosenAnswer()) + " - "
+                    + "Correct answer: " + handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()) + " - "
+                    + "Time: " + playedQuestion.getTime()
+            );
+            Row row = sheet.createRow(rowNum++);
+            Cell cell1 = row.createCell(0);
+            cell1.setCellValue(playedQuestion.getQuestion().getTitle());
+            Cell cell2 = row.createCell(1);
+            cell2.setCellValue(handleAnswer(playedQuestion.getChosenAnswer()));
+            Cell cell3 = row.createCell(2);
+            cell3.setCellValue(handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()));
+            Cell cell4 = row.createCell(3);
+            cell4.setCellValue((handleAnswer(playedQuestion.getChosenAnswer()) == null ? handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()) == null : handleAnswer(playedQuestion.getChosenAnswer()).equals(handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()))));
+        }
+
+        try {
+            FileOutputStream outputStream = new FileOutputStream("History.xlsx");
+            workbook.write(outputStream);
+            workbook.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Done");
     }
 }
