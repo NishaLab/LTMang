@@ -284,6 +284,8 @@ public class CustomServer {
                 dos.flush();
                 System.out.println("send Session" + sessionMap.get(client));
             }
+            System.out.println("game in here");
+            System.out.println(game);
             gd.saveGame(game);
             frame.getQuestion().setText("Game Over!");
             reset();
