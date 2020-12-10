@@ -51,13 +51,14 @@ public class PlayerDAO extends DAO {
         Player player = new Player();
         try {
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, player.getAddress());
+            ps.setString(1, address);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 player.setId(rs.getInt("id"));
                 player.setName(rs.getString("name"));
                 player.setAddress(rs.getString("address"));
             }
+//            System.out.println("player in query: " + player);
         } catch (Exception e) {
             e.printStackTrace();
         }
