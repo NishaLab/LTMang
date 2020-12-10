@@ -72,6 +72,10 @@ public class PlayerDAO extends DAO {
             ps.setString(1, player.getName());
             ps.setString(2, player.getAddress());
             ps.executeUpdate();
+            ResultSet generatedKeys = ps.getGeneratedKeys();
+            if(generatedKeys.next()){
+                player.setId(generatedKeys.getInt(1));
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;

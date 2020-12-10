@@ -91,6 +91,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Export Details Result"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="exportBttActionPerformed"/>
+          </Events>
         </Component>
         <Component class="keeptoo.KButton" name="playBtt">
           <Properties>

@@ -8,7 +8,6 @@ package Client;
 /**
  * @author LEGION
  */
-
 import DAO.PlayerDAO;
 import Model.*;
 
@@ -28,6 +27,10 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import keeptoo.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ClientController {
 
@@ -110,7 +113,7 @@ public class ClientController {
         pauseBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (pauseRemaining>0 && !isPause) {
+                if (pauseRemaining > 0 && !isPause) {
                     try {
                         dos.writeUTF("-1");
                         dos.flush();
@@ -124,7 +127,6 @@ public class ClientController {
                     frame.getQuestion().setText("You have no more chance to pause!");
                     frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
                 }
-
 
             }
         });
@@ -186,9 +188,9 @@ public class ClientController {
 
     public void startTimeCountdown(int time, Question q) throws InterruptedException, IOException, ExecutionException {
 
-
         SwingWorker worker = new SwingWorker() {
-            boolean willWrite =  (time != 0);
+            boolean willWrite = (time != 0);
+
             @Override
             protected String doInBackground() throws Exception {
                 for (int i = time; i > 0; i--) {
@@ -220,7 +222,9 @@ public class ClientController {
                 try {
                     String statusMsg = (String) get();
                     System.out.println(statusMsg);
-                    if (willWrite) frame.getCounter().setText(statusMsg);
+                    if (willWrite) {
+                        frame.getCounter().setText(statusMsg);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
@@ -274,13 +278,13 @@ public class ClientController {
                         dos.flush();
                     } else {
 //                        System.out.println("over written!");
-                        if (answer=="0") dos.writeUTF(answer);
+                        if (answer == "0") {
+                            dos.writeUTF(answer);
+                        }
                         dos.writeUTF("over");
                         dos.flush();
                     }
 //                    System.out.println(timeout + ", " + answer);
-
-
 
                 }
 
@@ -291,9 +295,9 @@ public class ClientController {
             } catch (EOFException e) {
                 System.out.println("...");
 //                e.printStackTrace();
-            }
-            catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                System.out.println("pause time");
+//                e.printStackTrace();
             }
         }
         try {
@@ -321,13 +325,13 @@ public class ClientController {
         });
         KButton exportBtt = vsf.getExportBtt();
         exportBtt.addActionListener(new ActionListener() {
-                                        @Override
-                                        public void actionPerformed(ActionEvent e) {
-                                            saveHistory(s);
-                                            JOptionPane.showMessageDialog(null, "Export Successful");
+            public void actionPerformed(ActionEvent e) {
+                saveHistory(s);
+                WriteFileExcel(s);
+                JOptionPane.showMessageDialog(null, "Export Successful");
 
-                                        }
-                                    }
+            }
+        }
         );
     }
 
@@ -367,5 +371,55 @@ public class ClientController {
             System.out.println(e);
         }
         System.out.println("Saved!");
+    }
+
+    public void WriteFileExcel(Session session) {
+        System.out.println("Create file excel");
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("Play History");
+        int rowNum = 0;
+        Row firstRow = sheet.createRow(rowNum++);
+        Cell firstCell = firstRow.createCell(0);
+        firstCell.setCellValue("List of player");
+        List<PlayedQuestion> listOfPlayedQuestion = session.getQuestion();;
+
+        Row header = sheet.createRow(rowNum++);
+        Cell cellHeader1 = header.createCell(0);
+        cellHeader1.setCellValue("Question");
+        Cell cellHeader2 = header.createCell(1);
+        cellHeader2.setCellValue("Chosen answer");
+        Cell cellHeader3 = header.createCell(2);
+        cellHeader3.setCellValue("Correct answer");
+        Cell cellHeader4 = header.createCell(3);
+        cellHeader4.setCellValue("Is correct");
+
+        for (PlayedQuestion playedQuestion : listOfPlayedQuestion) {
+            System.out.println(
+                    "Question: " + playedQuestion.getQuestion().getTitle() + " - "
+                    + "Chosen answer: " + handleAnswer(playedQuestion.getChosenAnswer()) + " - "
+                    + "Correct answer: " + handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()) + " - "
+                    + "Time: " + playedQuestion.getTime()
+            );
+            Row row = sheet.createRow(rowNum++);
+            Cell cell1 = row.createCell(0);
+            cell1.setCellValue(playedQuestion.getQuestion().getTitle());
+            Cell cell2 = row.createCell(1);
+            cell2.setCellValue(handleAnswer(playedQuestion.getChosenAnswer()));
+            Cell cell3 = row.createCell(2);
+            cell3.setCellValue(handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()));
+            Cell cell4 = row.createCell(3);
+            cell4.setCellValue((handleAnswer(playedQuestion.getChosenAnswer()) == null ? handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()) == null : handleAnswer(playedQuestion.getChosenAnswer()).equals(handleAnswer(playedQuestion.getQuestion().getCorrectAnswer()))));
+        }
+
+        try {
+            FileOutputStream outputStream = new FileOutputStream("History.xlsx");
+            workbook.write(outputStream);
+            workbook.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Done");
     }
 }

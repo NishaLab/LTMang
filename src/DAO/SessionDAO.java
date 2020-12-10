@@ -12,6 +12,8 @@ package DAO;
 import Model.*;
 import java.util.ArrayList;
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SessionDAO extends DAO {
 
