@@ -10,6 +10,7 @@ package Client;
  */
 import DAO.PlayerDAO;
 import Model.*;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
@@ -19,10 +20,12 @@ import java.util.*;
 import Model.Question;
 import Model.Session;
 import Server.CustomServer;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+
 import keeptoo.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -35,13 +38,15 @@ public class ClientController {
     private Socket client;
     private int remotePort;
     private String host;
+    private int pauseRemaining;
 
     private Question question;
     private int timer;
-    
+
     private ObjectOutputStream dos;
     private ObjectInputStream dis;
     private String answer;
+    private boolean isPause;
 
     public ClientController(ClientFrame frame) {
         this.frame = frame;
@@ -53,6 +58,7 @@ public class ClientController {
 
     private void connect(String host, int remotePort) {
         try {
+            pauseRemaining = 5;
             this.client = new Socket(host, remotePort);
             this.dos = new ObjectOutputStream(client.getOutputStream());
             this.dis = new ObjectInputStream(client.getInputStream());
@@ -93,13 +99,35 @@ public class ClientController {
         KButton cBtt = frame.getcBtt();
         KButton dBtt = frame.getdBtt();
         KButton startBtn = frame.getExportBtt();
+        KButton pauseBtn = frame.getPlayBtt();
 
         startBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Play btn");
                 startClient();
-                frame.getQuestion().setText("Connecting to server, Please Wait...");
+                frame.getQuestion().setText("Connected to server, waiting for the game to start...");
+            }
+        });
+
+        pauseBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (pauseRemaining > 0 && !isPause) {
+                    try {
+                        dos.writeUTF("-1");
+                        dos.flush();
+                        isPause = true;
+                        pauseRemaining--;
+                        frame.getQuestion().setText("Game pause! You have " + pauseRemaining + " pause requests remaining.");
+                    } catch (IOException ex) {
+
+                    }
+                } else {
+                    frame.getQuestion().setText("You have no more chance to pause!");
+                    frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
+                }
+
             }
         });
         aBtt.addActionListener(new ActionListener() {
@@ -158,14 +186,25 @@ public class ClientController {
         });
     }
 
-    public void startTimeCountdown(int time) throws InterruptedException, IOException, ExecutionException {
-        int timeLeft = time;
+    public void startTimeCountdown(int time, Question q) throws InterruptedException, IOException, ExecutionException {
+
         SwingWorker worker = new SwingWorker() {
+            boolean willWrite = (time != 0);
+
             @Override
             protected String doInBackground() throws Exception {
-                for (int i = time; i >= 0; i--) {
-                    publish(i);
-                    Thread.sleep(1000);
+                for (int i = time; i > 0; i--) {
+//                    System.out.println(isPause);
+                    if (!isPause) {
+                        publish(i);
+                        Thread.sleep(1000);
+                    } else {
+                        Thread.sleep(10000);
+                        isPause = false;
+                        Thread.sleep(1000);
+//                        break;
+                    }
+
                     //System.out.println(i);
                 }
                 return "Time's up.";
@@ -183,7 +222,9 @@ public class ClientController {
                 try {
                     String statusMsg = (String) get();
                     System.out.println(statusMsg);
-                    frame.getCounter().setText(statusMsg);
+                    if (willWrite) {
+                        frame.getCounter().setText(statusMsg);
+                    }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
@@ -197,10 +238,10 @@ public class ClientController {
     public void runClient() {
         System.out.println("run");
         while (true) {
-            answer = null;
-
+//            isPause = false;
             try {
                 Object obj = dis.readObject();
+//                System.out.println("received: " + obj);
                 if (obj instanceof String && "Game Over".equals((String) obj)) {
                     System.out.println("read session");
                     Session session = (Session) dis.readObject();
@@ -209,10 +250,10 @@ public class ClientController {
                 } else {
                     question = (Question) obj;
                     timer = dis.readInt();
-                    System.out.println(timer);
-                    System.out.println(question);
-                    startTimeCountdown(timer);
-
+//                    System.out.println(timer);
+//                    System.out.println(question);
+                    startTimeCountdown(timer, question);
+//                    System.out.println("Time to set text");
                     frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
                     frame.getaBtt().setText("A. " + question.getAnswerA());
                     frame.getbBtt().setText("B. " + question.getAnswerB());
@@ -220,13 +261,31 @@ public class ClientController {
                     frame.getdBtt().setText("D. " + question.getAnswerD());
                     //Wait for server to send 'Time out' message
                     String timeout = dis.readUTF();
+//                    System.out.println("timeout: " + timeout);
+                    if (timeout.equals("Pause")) {
+                        isPause = true;
+//                        Thread.sleep(10000);
+//                        frame.getQuestion().setText(question.getTitle() + ": " + question.getQuestionContent());
+                        continue;
+                    }
 
                     if (answer == null) {
+//                        System.out.println("go here");
                         answer = "0";
                         dos.writeUTF(answer);
                         dos.flush();
+                        dos.writeUTF("over");
+                        dos.flush();
+                    } else {
+//                        System.out.println("over written!");
+                        if (answer == "0") {
+                            dos.writeUTF(answer);
+                        }
+                        dos.writeUTF("over");
+                        dos.flush();
                     }
-                    System.out.println(timeout + ", " + answer);
+//                    System.out.println(timeout + ", " + answer);
+
                 }
 
             } catch (SocketException e) {
@@ -234,10 +293,11 @@ public class ClientController {
                 System.out.println("Server is not available.");
                 break;
             } catch (EOFException e) {
-                System.out.println("pause time");
+                System.out.println("...");
 //                e.printStackTrace();
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("pause time");
+//                e.printStackTrace();
             }
         }
         try {
@@ -265,7 +325,6 @@ public class ClientController {
         });
         KButton exportBtt = vsf.getExportBtt();
         exportBtt.addActionListener(new ActionListener() {
-            @Override
             public void actionPerformed(ActionEvent e) {
                 saveHistory(s);
                 WriteFileExcel(s);
@@ -311,7 +370,7 @@ public class ClientController {
         } catch (Exception e) {
             System.out.println(e);
         }
-        System.out.println("Success...");
+        System.out.println("Saved!");
     }
 
     public void WriteFileExcel(Session session) {
