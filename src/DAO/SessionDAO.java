@@ -12,6 +12,8 @@ package DAO;
 import Model.*;
 import java.util.ArrayList;
 import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SessionDAO extends DAO {
 
@@ -67,6 +69,7 @@ public class SessionDAO extends DAO {
         PlayedQuestionDAO pqd = new PlayedQuestionDAO();
         String sessionSQL = "INSERT INTO tblsession(Player_id, tblGame_id) VALUES(?,?)";
         try {
+            conn.setAutoCommit(false);
             PreparedStatement ps = conn.prepareStatement(sessionSQL, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, session.getPlayer().getId());
             ps.setInt(2, game_id);
@@ -79,8 +82,14 @@ public class SessionDAO extends DAO {
 
                 }
             }
+            conn.commit();
         } catch (Exception e) {
             e.printStackTrace();
+            try {
+                conn.rollback();
+            } catch (SQLException ex) {
+                Logger.getLogger(SessionDAO.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return false;
         }
         return true;
