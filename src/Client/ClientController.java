@@ -143,6 +143,8 @@ public class ClientController {
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
+                }else {
+                    frame.getQuestion().setText("Game paused! Please wait...");
                 }
 
             }
@@ -159,6 +161,8 @@ public class ClientController {
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
+                }else {
+                    frame.getQuestion().setText("Game paused! Please wait...");
                 }
 
 
@@ -176,6 +180,8 @@ public class ClientController {
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
+                }else {
+                    frame.getQuestion().setText("Game paused! Please wait...");
                 }
 
             }
@@ -192,6 +198,8 @@ public class ClientController {
                     } catch (IOException ioException) {
                         ioException.printStackTrace();
                     }
+                } else {
+                    frame.getQuestion().setText("Game paused! Please wait...");
                 }
 
             }
