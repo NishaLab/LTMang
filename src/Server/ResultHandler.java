@@ -9,6 +9,7 @@ public class ResultHandler extends Thread {
     //    private ObjectOutputStream oos;
     private String result;
     private CustomServer mainServer;
+    private boolean isOver;
 
     public ResultHandler(ObjectInputStream ois, CustomServer server) {
         this.ois = ois;
@@ -22,14 +23,27 @@ public class ResultHandler extends Thread {
 
     @Override
     public void run() {
-        try {
-            result = ois.readUTF();
-            if (result.equals("-1")) mainServer.setPause(true);
+        while (true) {
+            String temp = null;
+            try {
+                temp = ois.readUTF();
+//                System.out.println("temp: " + temp);
+                if (temp.equals("-1")) {
+                    mainServer.setPause(true);
+                    continue;
+                } else if(temp.equals("over")) {
+//                    System.out.println("over" + result);
+                    break;
+                }
+                result = temp;
 
-            System.out.println("Receiving result end");
+                System.out.println("Receiving result end");
 
-        } catch (IOException e) {
-            e.printStackTrace();
+            } catch (IOException e) {
+//                e.printStackTrace();
+                System.out.println("...");
+                break;
+            }
         }
 
     }

@@ -100,53 +100,7 @@ public class ClientHandler extends Thread {
 //        System.out.println(question.getTitle() + " " + response);
 
 
-        System.out.println("Thread's life end.");
-
-//        while (true) {
-//            questionTime = System.currentTimeMillis();
-//            System.out.println("Here");
-//
-//            QuestionDAO questionDAO = new QuestionDAO();
-//            question = questionDAO.getAllQuestion();
-//            try {
-//                dos.writeInt(question.size());
-//                dos.flush();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            for (Question q : question) {
-//                try {
-////                        dos.writeUTF(q.getQuestionContent());
-////                        dos.writeUTF(q.getAnswerA());
-////                        dos.writeUTF(q.getAnswerB());
-////                        dos.writeUTF(q.getAnswerC());
-////                        dos.writeUTF(q.getAnswerD());
-//
-//                        //Thread.sleep(5000);
-//                    dos.writeObject(q);
-//                    dos.flush();
-//
-//                    timeCounter();
-//
-//
-//                    String ans = dis.readUTF();
-//
-//                    System.out.println(ans);
-////                    if (ans == null) {
-////                        dos.writeBoolean(isTimedout);
-////                        System.out.println("Time out.");
-////                    } else {
-////                        System.out.println(ans);
-////                    }
-//                    System.out.println("DONE");
-//                } catch (Exception e) {
-//                    System.out.println(e.getMessage());
-//                }
-//
-//            }
-//
-//        }
-//    }
+//        System.out.println("Thread's life end.");
 
     }
 }
