@@ -134,54 +134,66 @@ public class ClientController {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Clicked A");
-                try {
-                    answer = "1";
-                    dos.writeUTF("1");
-                    dos.flush();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                if (!isPause) {
+                    System.out.println("Clicked A");
+                    try {
+                        answer = "1";
+                        dos.writeUTF("1");
+                        dos.flush();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
+
             }
         });
         bBtt.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Clicked B");
-                try {
-                    answer = "2";
-                    dos.writeUTF("2");
-                    dos.flush();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                if (!isPause) {
+                    System.out.println("Clicked B");
+                    try {
+                        answer = "2";
+                        dos.writeUTF("2");
+                        dos.flush();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
+
 
             }
         });
         cBtt.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Clicked C");
-                try {
-                    answer = "3";
-                    dos.writeUTF("3");
-                    dos.flush();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                if (!isPause) {
+                    System.out.println("Clicked C");
+                    try {
+                        answer = "3";
+                        dos.writeUTF("3");
+                        dos.flush();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
+
             }
         });
         dBtt.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Clicked D");
-                try {
-                    answer = "4";
-                    dos.writeUTF("4");
-                    dos.flush();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                if (!isPause) {
+                    System.out.println("Clicked D");
+                    try {
+                        answer = "4";
+                        dos.writeUTF("4");
+                        dos.flush();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
+
             }
         });
     }
@@ -239,6 +251,7 @@ public class ClientController {
         System.out.println("run");
         while (true) {
 //            isPause = false;
+            answer = null;
             try {
                 Object obj = dis.readObject();
 //                System.out.println("received: " + obj);
@@ -270,7 +283,7 @@ public class ClientController {
                     }
 
                     if (answer == null) {
-//                        System.out.println("go here");
+                        System.out.println("go here");
                         answer = "0";
                         dos.writeUTF(answer);
                         dos.flush();
@@ -380,7 +393,7 @@ public class ClientController {
         int rowNum = 0;
         Row firstRow = sheet.createRow(rowNum++);
         Cell firstCell = firstRow.createCell(0);
-        firstCell.setCellValue("List of player");
+        firstCell.setCellValue("Game History");
         List<PlayedQuestion> listOfPlayedQuestion = session.getQuestion();;
 
         Row header = sheet.createRow(rowNum++);
