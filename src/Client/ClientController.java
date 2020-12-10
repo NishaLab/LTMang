@@ -110,7 +110,7 @@ public class ClientController {
         pauseBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (pauseRemaining>0) {
+                if (pauseRemaining>0 && !isPause) {
                     try {
                         dos.writeUTF("-1");
                         dos.flush();
